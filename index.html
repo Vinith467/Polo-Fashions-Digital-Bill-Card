@@ -20,6 +20,25 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 
     <!-- Custom CSS -->
+     <style>
+        div.card-bill{
+            border: 2px solid blue;
+            border-radius: 1rem;
+            box-shadow:blue 4px 4px 4px 4px;
+        }
+        div.address-card{
+             border: 2px solid blue;
+            border-radius: 1rem;
+            box-shadow:blue 1px 1px 1px 1px ;  
+        }
+        div.name-card{
+            border: 2px solid blue;
+            border-radius: 1rem;
+            box-shadow:blue 1px 1px 1px 1px ;  
+            padding: 10px;
+
+        }
+     </style>
 
 
 </head>
@@ -294,8 +313,8 @@
                         <h2 className="text-2xl font-bold text-center mb-6 text-gray-700">
                             👇 Bill Preview 👇
                         </h2>
-                        <div ref={billRef} className="bg-white p-8">
-                            <div className="bill-border mb-4">
+                        <div ref={billRef} className="bg-white p-8 card-bill">
+                            <div className="bill-border mb-4 name-card">
                                 <div className="text-center">
                                     <div className="text-sm mb-2">
                                         ✋ We are not responsible for stitched cloths after 3 Months
@@ -348,7 +367,7 @@
                                 </div>
                             </div>
 
-                            <div className="mt-6 text-center bill-border">
+                            <div className="mt-6 text-center bill-border address-card">
                                 <div className="text-4xl font-bold text-blue-900 mb-2">POLO FASHIONS</div>
                                 <div className="text-base">
                                     Get Your Dress Ready in as soon as 1–2 Hours – Only at Polo Fashions!
