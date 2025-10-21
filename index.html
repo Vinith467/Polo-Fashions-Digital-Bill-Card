@@ -146,7 +146,7 @@
                 }
 
                 // 3) Prepare prefilled message
-                const message = `Hi! Your bill from Polo Fashions is ready.\n\nCard No: ${cardNumber}\nDate: ${date}\nTotal: ₹${calculateTotal()}\nAdvance: ₹${advance || 0}\nBalance: ₹${calculateBalance()}\n\n🧾 Your digital bill is generated. Please check it once.`;
+                const message = `Hi! Your bill from Polo Fashions is ready.\n\nCard No: ${cardNumber}\nDate: ${date}\nTotal: ₹${calculateTotal()}\nAdvance: ₹${advance || 0}\nBalance: ₹${calculateBalance()}\n\n🧾 Your digital Card is generated. Please check it once.`;
 
                 // 4) Open WhatsApp chat (mobile or web) with prefilled text
                 const whatsappUrl = `https://wa.me/${formattedPhone}?text=${encodeURIComponent(message)}`;
@@ -166,7 +166,7 @@
                 <div className="app-container">
                     <div className="card">
                         <h1 className="text-3xl font-bold text-center mb-8 text-blue-900">
-                            📱 Polo Fashions - Digital Bill
+                            👔  Polo Fashions - Digital Bill
                         </h1>
 
                         <div className="space-y-6 mb-8">
@@ -213,7 +213,7 @@
                             {/* Items */}
                             <div>
                                 <div className="flex justify-between items-center mb-4">
-                                    <label className="text-xl font-bold">👔 Items</label>
+                                    <label className="text-xl font-bold">🛍️ Items</label>
                                     <button
                                         onClick={addItem}
                                         className="bg-green-600 text-white px-6 py-3 rounded-lg text-lg hover:bg-green-700 flex items-center gap-2"
