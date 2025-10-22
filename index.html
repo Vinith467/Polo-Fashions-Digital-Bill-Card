@@ -18,52 +18,6 @@
 
     <!-- HTML2Canvas for image generation -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-
-    <style>
-        .app-container {
-            max-width: 1400px;
-            margin: 0 auto;
-            padding: 20px;
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 30px;
-        }
-        .card {
-            background: white;
-            padding: 30px;
-            border-radius: 20px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
-        }
-        .bill-preview {
-            position: sticky;
-            top: 20px;
-            height: fit-content;
-        }
-        .card-bill {
-            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
-            border-radius: 15px;
-        }
-        .bill-border {
-            border: 3px solid #1e3a8a;
-            padding: 15px;
-            border-radius: 10px;
-        }
-        .name-card {
-            background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
-        }
-        .address-card {
-            background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
-        }
-        @media (max-width: 1024px) {
-            .app-container {
-                grid-template-columns: 1fr;
-            }
-            .bill-preview {
-                position: relative;
-                top: 0;
-            }
-        }
-    </style>
 </head>
 
 <body>
