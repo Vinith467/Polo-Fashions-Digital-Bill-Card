@@ -16,25 +16,30 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 
     <style>
+        /* *** MOBILE-FIRST DESIGN FIXES ***
+        The default is a single column layout (for mobile).
+        It only switches to two columns on larger screens (1024px and up).
+        */
         .app-container {
             max-width: 1400px;
             margin: 0 auto;
-            padding: 20px;
+            padding: 10px; /* Reduced padding for mobile */
             display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 30px;
+            grid-template-columns: 1fr; /* Default: Single column (Form on top, Preview below) */
+            gap: 20px; /* Reduced gap for mobile */
         }
 
         .card {
             background: white;
-            padding: 30px;
-            border-radius: 20px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            padding: 20px; /* Reduced padding for mobile */
+            border-radius: 15px; /* Slightly smaller radius for mobile */
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
         }
 
         .bill-preview {
-            position: sticky;
-            top: 20px;
+            /* Position set for mobile/default */
+            position: relative;
+            top: 0;
             height: fit-content;
         }
 
@@ -44,10 +49,10 @@
         }
 
         .bill-border {
-            border: 3px solid #1e3a8a; /* Blue-900 border */
+            border: 3px solid #1e3a8a;
             padding: 15px;
             border-radius: 10px;
-            background-color: white; /* Ensure white background */
+            background-color: white;
         }
 
         .name-card, .address-card {
@@ -56,7 +61,7 @@
         }
         
         .text-red-600-modified {
-            color: #1e3a8a; /* Dark Blue for balance */
+            color: #1e3a8a;
             font-weight: 700;
         }
         
@@ -116,15 +121,22 @@
             color: #10b981;
         }
 
-        /* Responsive adjustments */
-        @media (max-width: 1024px) {
+        /* Responsive adjustment: Switch to two columns for desktop/large screen */
+        @media (min-width: 1024px) {
             .app-container {
-                grid-template-columns: 1fr;
+                padding: 20px;
+                grid-template-columns: 1fr 1fr;
+                gap: 30px;
+            }
+            
+            .card {
+                padding: 30px;
             }
 
             .bill-preview {
-                position: relative;
-                top: 0;
+                /* Reset sticky position for large screens */
+                position: sticky;
+                top: 20px;
             }
         }
     </style>
@@ -148,13 +160,11 @@
 
         // --- Utility Functions ---
 
-        // Helper to retrieve all bills
         const getBillHistory = () => {
             const history = localStorage.getItem('billHistory');
             return history ? JSON.parse(history) : [];
         };
 
-        // Helper to save a new bill record
         const saveBillToHistory = (billData) => {
             const history = getBillHistory();
             const newBill = {
@@ -174,7 +184,6 @@
             return newBill;
         };
         
-        // Helper to save Card Number against Phone Number (for lookup)
         const saveCustomerCardNumber = (phoneNumber, cardNumber) => {
              const phone = phoneNumber.replace(/\D/g, '');
              if (phone.length === 10 && cardNumber) {
@@ -182,7 +191,6 @@
              }
         };
 
-        // Helper to retrieve Card Number by Phone Number
         const loadCustomerCardNumber = (phoneNumber) => {
              const phone = phoneNumber.replace(/\D/g, '');
              if (phone.length === 10) {
@@ -205,7 +213,6 @@
                 setHistory(storedHistory);
             }, []);
 
-            // Function to update the status of a specific bill
             const toggleStatus = (id) => {
                 const updatedHistory = history.map(bill => {
                     if (bill.id === id) {
@@ -221,7 +228,6 @@
                 localStorage.setItem('billHistory', JSON.stringify(updatedHistory));
             };
             
-            // Filter the history based on the search term (Card Number or Phone Number)
             const filteredHistory = useMemo(() => {
                 if (!searchTerm) return history;
                 const lowerCaseSearch = searchTerm.toLowerCase();
@@ -259,8 +265,6 @@
                                 <Search size={24} />
                             </button>
                         </div>
-                        
-                        {/* THE CLEAR HISTORY BUTTON HAS BEEN REMOVED FROM HERE */}
                     </div>
 
                     {filteredHistory.length === 0 ? (
@@ -288,7 +292,6 @@
                                             <td className="py-3 px-4 border-b border-gray-200 text-sm">{bill.phoneNumber}</td>
                                             <td className="py-3 px-4 border-b border-gray-200 text-sm text-red-600">{bill.readyDate}</td>
                                             <td className="py-3 px-4 border-b border-gray-200 text-right text-sm font-bold text-red-600">{bill.balance.toFixed(0)}</td>
-                                            {/* Status Toggle Cell */}
                                             <td className="py-3 px-4 border-b border-gray-200 text-center">
                                                 <label className="toggle-switch">
                                                     <input 
@@ -299,7 +302,6 @@
                                                     <span className="slider round"></span>
                                                 </label>
                                             </td>
-                                            {/* End Status Toggle Cell */}
                                         </tr>
                                     ))}
                                 </tbody>
@@ -320,7 +322,6 @@
             const [advance, setAdvance] = useState('');
             const billRef = useRef(null);
 
-            // --- Customer Lookup Function ---
             const searchCustomerCard = () => {
                 if (!phoneNumber || phoneNumber.length < 10) {
                     alert('Please enter a valid 10-digit phone number to search.');
@@ -331,12 +332,11 @@
                     setCardNumber(storedCardNumber);
                     alert(`Card Number found for ${phoneNumber}: ${storedCardNumber}`);
                 } else {
-                    setCardNumber(''); // Clear card number if not found
+                    setCardNumber('');
                     alert(`No previous Card Number found for ${phoneNumber}.`);
                 }
             };
             
-            // --- Calculation Functions (remain the same) ---
             const calculateTotal = () => {
                 return items.reduce((sum, item) => sum + (parseFloat(item.amount) || 0), 0);
             };
@@ -347,7 +347,6 @@
                 return total - adv;
             };
             
-            // --- Item Functions (remain the same) ---
             const addItem = () => {
                 setItems([...items, { shirts: '', pants: '', amount: '' }]);
             };
@@ -364,7 +363,6 @@
                 setItems(newItems);
             };
 
-            // --- Action Handlers ---
             const generateBillData = () => ({
                 readyDate,
                 cardNumber,
@@ -376,7 +374,6 @@
                 balance: calculateBalance()
             });
             
-            // Downloads the bill image
             const downloadBillImage = async () => {
                 const element = billRef.current;
                 const canvas = await html2canvas(element, { scale: 2, backgroundColor: '#ffffff', logging: false });
@@ -398,7 +395,6 @@
                 await downloadBillImage();
             };
 
-            // Share Handler (Saves Card Number, Saves to History, AND sends)
             const shareBill = async () => {
                 if (!phoneNumber || phoneNumber.length < 10) {
                     alert('10 ಅಂಕಿಯ ಫೋನ್ ಸಂಖ್ಯೆಯನ್ನು ನಮೂದಿಸಿ\nPlease enter customer phone number (10 digits)');
@@ -426,7 +422,6 @@
                 window.open(whatsappUrl, '_blank');
             };
 
-            // Share SMS Handler (Saves Card Number, Saves to History, AND sends)
             const shareSMS = () => {
                 if (!phoneNumber || phoneNumber.length < 10) {
                     alert('10 ಅಂಕಿಯ ಫೋನ್ ಸಂಖ್ಯೆಯನ್ನು ನಮೂದಿಸಿ\nPlease enter customer phone number (10 digits)');
@@ -596,7 +591,7 @@
                     {/* Bill Preview */}
                     <div className="bill-preview">
                         <h2 className="text-2xl font-bold text-center mb-6 text-gray-700">
-                            👇 Bill Preview 👇
+                            👇 Bill Preview (White/Blue/Black) 👇
                         </h2>
                         <div ref={billRef} className="bg-white p-8 card-bill">
                             <div className="bill-border mb-4 name-card">
