@@ -581,7 +581,7 @@
                     {/* Bill Preview - FINAL FIX APPLIED HERE */}
                     <div className="bill-preview max-w-full overflow-hidden">
                         <h2 className="text-xl font-bold text-center mb-4 text-gray-700">
-                            👇 Bill Preview (White/Blue/Black) 👇
+                            👇 Bill Preview 👇
                         </h2>
                         {/* FIX: Added w-full to ensure it uses 100% of the space */}
                         <div ref={billRef} className="bg-white p-4 w-full card-bill shadow-xl rounded-lg">
@@ -594,7 +594,7 @@
                                         {cardNumber || '___'}
                                     </div>
                                     <div className="text-xl font-semibold mb-1">Phone: <span className="text-blue-700">{phoneNumber || 'N/A'}</span></div>
-                                    <div className="text-xl font-semibold text-black mb-1">Ready/Delivery Date: <span className="font-bold text-red-600-modified">{readyDate || 'To be Confirmed'}</span></div>
+                                    <div className="text-xl font-semibold text-black mb-1">Delivery Date: <span className="font-bold text-red-600-modified">{readyDate || 'To be Confirmed'}</span></div>
                                     <div className="text-xl font-semibold mb-1 text-black">Date: {date}</div>
                                 </div>
                             </div>
