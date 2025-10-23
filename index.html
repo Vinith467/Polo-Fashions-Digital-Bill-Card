@@ -3,72 +3,102 @@
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
     <title>Polo Fashions - Digital Bill</title>
 
+    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
 
+    <!-- React and ReactDOM -->
     <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
     <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
 
+    <!-- Babel for JSX -->
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
 
+    <!-- HTML2Canvas for image generation -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 
     <style>
-        /* Base (Mobile) Layout */
+        * {
+            box-sizing: border-box;
+        }
+        body {
+            margin: 0;
+            padding: 0;
+            background: #f3f4f6;
+        }
         .app-container {
             max-width: 1400px;
             margin: 0 auto;
-            padding: 4px; /* Tight padding for mobile screens */
-            display: grid;
-            grid-template-columns: 1fr;
+            padding: 10px;
+            display: flex;
+            flex-direction: column;
             gap: 20px;
         }
-
         .card {
             background: white;
-            padding: 20px;
-            border-radius: 15px;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            padding: 15px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
         }
-
         .bill-preview {
-            position: relative;
-            top: 0;
-            height: fit-content;
-            /* FIX: Ensure the preview itself does not exceed available width */
-            max-width: 100vw; 
+            width: 100%;
         }
-
-        /* Bill-specific container borders/colors */
-        .bill-card-section {
-            background: white; 
-            border: 3px solid #1e3a8a;
-            padding: 10px; 
-            border-radius: 10px;
+        .card-bill {
+            box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+            border-radius: 12px;
+            max-width: 100%;
+            overflow: hidden;
         }
-        
-        .text-red-600-modified {
-            color: #1e3a8a;
-            font-weight: 700;
+        .bill-border {
+            border: 2px solid #1e3a8a;
+            padding: 10px;
+            border-radius: 8px;
+            background: white;
         }
-        
-        /* Status Toggle Styling (Unchanged) */
+        .name-card {
+            background: white;
+        }
+        .address-card {
+            background: white;
+        }
+        .customer-suggestion {
+            position: absolute;
+            background: white;
+            border: 2px solid #3b82f6;
+            border-radius: 8px;
+            max-height: 200px;
+            overflow-y: auto;
+            width: 100%;
+            z-index: 1000;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+        .customer-item {
+            padding: 12px;
+            cursor: pointer;
+            border-bottom: 1px solid #e5e7eb;
+        }
+        .customer-item:hover {
+            background: #dbeafe;
+        }
+        .database-container {
+            max-width: 100%;
+            margin: 0 auto;
+            padding: 10px;
+        }
         .toggle-switch {
             position: relative;
             display: inline-block;
-            width: 120px;
-            height: 34px;
-            user-select: none;
+            width: 50px;
+            height: 28px;
+            flex-shrink: 0;
         }
-
         .toggle-switch input {
             opacity: 0;
             width: 0;
             height: 0;
         }
-
         .slider {
             position: absolute;
             cursor: pointer;
@@ -76,55 +106,89 @@
             left: 0;
             right: 0;
             bottom: 0;
-            background-color: #ef4444; 
-            transition: 0.4s;
-            border-radius: 34px;
-            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.24);
+            background-color: #ef4444;
+            transition: .4s;
+            border-radius: 28px;
         }
-
         .slider:before {
             position: absolute;
-            content: "Pending";
-            height: 26px;
-            width: 55px;
+            content: "";
+            height: 20px;
+            width: 20px;
             left: 4px;
             bottom: 4px;
             background-color: white;
-            transition: 0.4s;
-            border-radius: 20px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: bold;
-            font-size: 10px;
-            color: #ef4444;
+            transition: .4s;
+            border-radius: 50%;
         }
-
         input:checked + .slider {
-            background-color: #10b981; 
+            background-color: #22c55e;
         }
-
         input:checked + .slider:before {
-            transform: translateX(53px);
-            content: "Delivered";
-            color: #10b981;
+            transform: translateX(22px);
         }
-
-        /* Desktop Layout: Switch to two columns */
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+        .animate-pulse {
+            animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        }
+        
+        /* Responsive Typography */
+        @media (max-width: 640px) {
+            .card {
+                padding: 12px;
+            }
+            .card-bill {
+                padding: 12px;
+            }
+            .bill-border {
+                padding: 8px;
+            }
+            h1 {
+                font-size: 1.5rem !important;
+            }
+            .text-4xl {
+                font-size: 1.75rem !important;
+            }
+            .text-3xl {
+                font-size: 1.5rem !important;
+            }
+            .text-2xl {
+                font-size: 1.25rem !important;
+            }
+            .text-xl {
+                font-size: 1rem !important;
+            }
+            .text-lg {
+                font-size: 0.95rem !important;
+            }
+        }
+        
+        /* Desktop layout */
         @media (min-width: 1024px) {
             .app-container {
-                padding: 20px;
+                display: grid;
                 grid-template-columns: 1fr 1fr;
                 gap: 30px;
+                padding: 20px;
             }
-            
             .card {
                 padding: 30px;
             }
-
             .bill-preview {
                 position: sticky;
                 top: 20px;
+                height: fit-content;
+            }
+            .card-bill {
+                padding: 32px;
+            }
+            .database-container {
+                max-width: 1200px;
+                padding: 20px;
             }
         }
     </style>
@@ -134,207 +198,318 @@
     <div id="root"></div>
 
     <script type="text/babel">
-        const { useState, useRef, useEffect, useMemo } = React;
+        const { useState, useRef, useEffect } = React;
 
-        // Simple icon components (Unchanged)
-        const Download = ({ size = 24 }) => (<svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3" /></svg>);
-        const Share2 = ({ size = 24 }) => (<svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="18" cy="5" r="3" /><circle cx="6" cy="12" r="3" /><circle cx="18" cy="19" r="3" /><line x1="8.59" y1="13.51" x2="15.42" y2="17.49" /><line x1="15.41" y1="6.51" x2="8.59" y2="10.49" /></svg>);
-        const MessageSquare = ({ size = 24 }) => (<svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" /></svg>);
-        const Plus = ({ size = 24 }) => (<svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" /></svg>);
-        const Trash2 = ({ size = 24 }) => (<svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="3 6 5 6 21 6" /><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" /><line x1="10" y1="11" x2="10" y2="17" /><line x1="14" y1="11" x2="14" y2="17" /></svg>);
-        const Search = ({ size = 24 }) => (<svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="11" cy="11" r="8" /><line x1="21" y1="21" x2="16.65" y2="16.65" /></svg>);
-        const Clock = ({ size = 24 }) => (<svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10" /><polyline points="12 6 12 12 16 14" /></svg>);
-        const Home = ({ size = 24 }) => (<svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" /><polyline points="9 22 9 12 15 12 15 22" /></svg>);
+        // Icon components
+        const Download = ({ size = 24 }) => (
+            <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3" />
+            </svg>
+        );
 
-        // --- Utility Functions (Unchanged) ---
-        const getBillHistory = () => {
-            const history = localStorage.getItem('billHistory');
-            return history ? JSON.parse(history) : [];
-        };
+        const Share2 = ({ size = 24 }) => (
+            <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <circle cx="18" cy="5" r="3" /><circle cx="6" cy="12" r="3" /><circle cx="18" cy="19" r="3" />
+                <line x1="8.59" y1="13.51" x2="15.42" y2="17.49" /><line x1="15.41" y1="6.51" x2="8.59" y2="10.49" />
+            </svg>
+        );
 
-        const saveBillToHistory = (billData) => {
-            const history = getBillHistory();
-            const newBill = {
-                id: Date.now(),
-                date: billData.date,
-                cardNumber: billData.cardNumber || 'N/A',
-                phoneNumber: billData.phoneNumber || 'N/A',
-                readyDate: billData.readyDate || 'N/A',
-                total: billData.total,
-                advance: billData.advance,
-                balance: billData.balance,
-                status: 'Pending',
-                timestamp: new Date().toLocaleString()
-            };
-            history.unshift(newBill);
-            localStorage.setItem('billHistory', JSON.stringify(history));
-            return newBill;
-        };
-        
-        const saveCustomerCardNumber = (phoneNumber, cardNumber) => {
-             const phone = phoneNumber.replace(/\D/g, '');
-             if (phone.length === 10 && cardNumber) {
-                 localStorage.setItem(`customerCard_${phone}`, cardNumber);
-             }
-        };
+        const MessageSquare = ({ size = 24 }) => (
+            <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+            </svg>
+        );
 
-        const loadCustomerCardNumber = (phoneNumber) => {
-             const phone = phoneNumber.replace(/\D/g, '');
-             if (phone.length === 10) {
-                 return localStorage.getItem(`customerCard_${phone}`);
-             }
-             return null;
-        };
+        const Plus = ({ size = 24 }) => (
+            <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" />
+            </svg>
+        );
 
+        const Trash2 = ({ size = 24 }) => (
+            <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <polyline points="3 6 5 6 21 6" /><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+                <line x1="10" y1="11" x2="10" y2="17" /><line x1="14" y1="11" x2="14" y2="17" />
+            </svg>
+        );
 
-        // --- BillHistory Component (Unchanged) ---
-        function BillHistory({ setPage }) {
-            const [history, setHistory] = useState([]);
-            const [searchTerm, setSearchTerm] = useState('');
-            
-            useEffect(() => {
-                const storedHistory = getBillHistory().map(bill => ({
-                    ...bill,
-                    status: bill.status || 'Pending' 
-                }));
-                setHistory(storedHistory);
-            }, []);
+        const Users = ({ size = 24 }) => (
+            <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+                <circle cx="9" cy="7" r="4" />
+                <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
+                <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+            </svg>
+        );
 
-            const toggleStatus = (id) => {
-                const updatedHistory = history.map(bill => {
-                    if (bill.id === id) {
-                        return { 
-                            ...bill, 
-                            status: bill.status === 'Pending' ? 'Delivered' : 'Pending' 
-                        };
-                    }
-                    return bill;
-                });
+        const Clock = ({ size = 24 }) => (
+            <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <circle cx="12" cy="12" r="10" />
+                <polyline points="12 6 12 12 16 14" />
+            </svg>
+        );
 
-                setHistory(updatedHistory);
-                localStorage.setItem('billHistory', JSON.stringify(updatedHistory));
-            };
-            
-            const filteredHistory = useMemo(() => {
-                if (!searchTerm) return history;
-                const lowerCaseSearch = searchTerm.toLowerCase();
-                return history.filter(bill => 
-                    String(bill.cardNumber).toLowerCase().includes(lowerCaseSearch) ||
-                    String(bill.phoneNumber).toLowerCase().includes(lowerCaseSearch)
+        const Home = ({ size = 24 }) => (
+            <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
+                <polyline points="9 22 9 12 15 12 15 22" />
+            </svg>
+        );
+
+        const Search = ({ size = 24 }) => (
+            <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <circle cx="11" cy="11" r="8" />
+                <path d="m21 21-4.35-4.35" />
+            </svg>
+        );
+
+        const ChevronDown = ({ size = 24 }) => (
+            <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <polyline points="6 9 12 15 18 9" />
+            </svg>
+        );
+
+        const ChevronUp = ({ size = 24 }) => (
+            <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <polyline points="18 15 12 9 6 15" />
+            </svg>
+        );
+
+        // Customer Database Page
+        function CustomerDatabase({ onBack, customers, orders, setOrders }) {
+            const [searchQuery, setSearchQuery] = useState('');
+            const [expandedCustomer, setExpandedCustomer] = useState(null);
+
+            const filteredCustomers = customers.filter(customer => 
+                customer.phone.includes(searchQuery) || 
+                customer.name.toLowerCase().includes(searchQuery.toLowerCase())
+            );
+
+            const getCustomerOrders = (customerId) => {
+                return orders.filter(o => o.customerId === customerId).sort((a, b) => 
+                    new Date(b.createdAt) - new Date(a.createdAt)
                 );
-            }, [history, searchTerm]);
+            };
+
+            const toggleOrderStatus = (orderId) => {
+                const updatedOrders = orders.map(order => {
+                    if (order.id === orderId) {
+                        return { ...order, delivered: !order.delivered };
+                    }
+                    return order;
+                });
+                setOrders(updatedOrders);
+                localStorage.setItem('polo_orders', JSON.stringify(updatedOrders));
+            };
+
+            const getTotalPending = () => {
+                return orders.filter(o => !o.delivered).reduce((sum, o) => sum + o.balance, 0);
+            };
+
+            const getPendingCount = () => {
+                return orders.filter(o => !o.delivered).length;
+            };
+
+            const getOverdueCount = () => {
+                const today = new Date();
+                today.setHours(0, 0, 0, 0);
+                return orders.filter(o => !o.delivered && o.readyDate && new Date(o.readyDate) < today).length;
+            };
+
+            const isOrderOverdue = (order) => {
+                if (!order.readyDate || order.delivered) return false;
+                const today = new Date();
+                today.setHours(0, 0, 0, 0);
+                return new Date(order.readyDate) < today;
+            };
 
             return (
-                <div className="card p-4 sm:p-6 lg:p-8 col-span-2">
-                    <h1 className="text-3xl font-bold text-center mb-6 text-blue-900 flex items-center justify-center gap-3">
-                        <Clock size={36} /> Bill History
-                    </h1>
-                    
-                    <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-3">
-                        <button
-                            onClick={() => setPage('home')}
-                            className="bg-blue-600 text-white py-2 px-4 rounded-xl text-lg font-bold hover:bg-blue-700 flex items-center gap-2 w-full md:w-auto"
-                        >
-                            <Home size={24} /> Back to Home
-                        </button>
-                        
-                        <div className="flex items-center gap-2 w-full md:max-w-lg">
+                <div className="database-container">
+                    {/* Header */}
+                    <div className="bg-white rounded-2xl shadow-xl p-6 mb-6">
+                        <div className="flex justify-between items-center mb-4">
+                            <h1 className="text-4xl font-bold text-purple-900 flex items-center gap-3">
+                                <Users size={40} />
+                                Customer Database
+                            </h1>
+                            <button
+                                onClick={onBack}
+                                className="flex items-center gap-2 bg-blue-600 text-white px-6 py-3 rounded-xl text-lg font-bold hover:bg-blue-700"
+                            >
+                                <Home size={24} />
+                                Home
+                            </button>
+                        </div>
+
+                        {/* Stats */}
+                        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6">
+                            <div className="bg-purple-50 p-4 rounded-lg border-2 border-purple-300">
+                                <div className="text-sm text-purple-700 font-semibold">Total Customers</div>
+                                <div className="text-3xl font-bold text-purple-900">{customers.length}</div>
+                            </div>
+                            <div className="bg-orange-50 p-4 rounded-lg border-2 border-orange-300">
+                                <div className="text-sm text-orange-700 font-semibold">Pending Orders</div>
+                                <div className="text-3xl font-bold text-orange-900">{getPendingCount()}</div>
+                            </div>
+                            <div className="bg-red-50 p-4 rounded-lg border-2 border-red-300">
+                                <div className="text-sm text-red-700 font-semibold">⚠️ Overdue</div>
+                                <div className="text-3xl font-bold text-red-900">{getOverdueCount()}</div>
+                            </div>
+                            <div className="bg-green-50 p-4 rounded-lg border-2 border-green-300">
+                                <div className="text-sm text-green-700 font-semibold">Total Balance</div>
+                                <div className="text-3xl font-bold text-green-900">₹{getTotalPending()}</div>
+                            </div>
+                        </div>
+
+                        {/* Search Bar */}
+                        <div className="relative">
+                            <Search className="absolute left-4 top-4 text-gray-400" size={24} />
                             <input
                                 type="text"
-                                value={searchTerm}
-                                onChange={(e) => setSearchTerm(e.target.value)}
-                                className="flex-grow text-lg p-3 border-2 border-blue-500 rounded-lg"
-                                placeholder="Search by Card/Phone No..."
+                                value={searchQuery}
+                                onChange={(e) => setSearchQuery(e.target.value)}
+                                placeholder="Search by name or phone number..."
+                                className="w-full pl-14 pr-4 py-4 text-lg border-2 border-purple-300 rounded-xl focus:border-purple-500 focus:outline-none"
                             />
-                            <button
-                                onClick={() => setSearchTerm(searchTerm)}
-                                className="bg-blue-500 text-white p-3 rounded-lg flex items-center justify-center hover:bg-blue-600"
-                            >
-                                <Search size={24} />
-                            </button>
                         </div>
                     </div>
 
-                    {filteredHistory.length === 0 ? (
-                        <div className="text-center p-10 bg-gray-50 rounded-xl text-gray-600 text-xl font-semibold">
-                            {searchTerm ? `No matching bills found for "${searchTerm}"` : 'No bills found in history.'}
-                        </div>
-                    ) : (
-                        <div className="overflow-x-auto">
-                            <table className="min-w-full bg-white border border-gray-200">
-                                <thead className="bg-blue-100">
-                                    <tr>
-                                        <th className="py-3 px-4 border-b-2 border-gray-200 text-left text-sm font-semibold text-gray-600">Time Saved</th>
-                                        <th className="py-3 px-4 border-b-2 border-gray-200 text-left text-sm font-semibold text-gray-600">Card No.</th>
-                                        <th className="py-3 px-4 border-b-2 border-gray-200 text-left text-sm font-semibold text-gray-600">Phone</th>
-                                        <th className="py-3 px-4 border-b-2 border-gray-200 text-left text-sm font-semibold text-gray-600">Ready Date</th>
-                                        <th className="py-3 px-4 border-b-2 border-gray-200 text-right text-sm font-semibold text-gray-600">Balance (₹)</th>
-                                        <th className="py-3 px-4 border-b-2 border-gray-200 text-center text-sm font-semibold text-gray-600">Status</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {filteredHistory.map((bill) => (
-                                        <tr key={bill.id} className="hover:bg-gray-50">
-                                            <td className="py-3 px-4 border-b border-gray-200 text-sm">{bill.timestamp.split(', ')[1]}<br/>{bill.timestamp.split(', ')[0]}</td>
-                                            <td className="py-3 px-4 border-b border-gray-200 text-sm font-semibold text-blue-800">{bill.cardNumber}</td>
-                                            <td className="py-3 px-4 border-b border-gray-200 text-sm">{bill.phoneNumber}</td>
-                                            <td className="py-3 px-4 border-b border-gray-200 text-sm text-red-600">{bill.readyDate}</td>
-                                            <td className="py-3 px-4 border-b border-gray-200 text-right text-sm font-bold text-red-600">{bill.balance.toFixed(0)}</td>
-                                            <td className="py-3 px-4 border-b border-gray-200 text-center">
-                                                <label className="toggle-switch">
-                                                    <input 
-                                                        type="checkbox" 
-                                                        checked={bill.status === 'Delivered'} 
-                                                        onChange={() => toggleStatus(bill.id)}
-                                                    />
-                                                    <span className="slider round"></span>
-                                                </label>
-                                            </td>
-                                        </tr>
-                                    ))}
-                                </tbody>
-                            </table>
-                        </div>
-                    )}
+                    {/* Customer List */}
+                    <div className="space-y-4">
+                        {filteredCustomers.length === 0 ? (
+                            <div className="bg-white rounded-xl p-8 text-center text-gray-500">
+                                {searchQuery ? 'No customers found matching your search.' : 'No customers yet. Create your first bill!'}
+                            </div>
+                        ) : (
+                            filteredCustomers.map(customer => {
+                                const customerOrders = getCustomerOrders(customer.id);
+                                const isExpanded = expandedCustomer === customer.id;
+                                const pendingOrders = customerOrders.filter(o => !o.delivered);
+                                const overdueOrders = customerOrders.filter(o => isOrderOverdue(o));
+                                const totalBalance = pendingOrders.reduce((sum, o) => sum + o.balance, 0);
+
+                                return (
+                                    <div key={customer.id} className="bg-white rounded-xl shadow-lg overflow-hidden border-2 border-purple-200">
+                                        {/* Customer Header */}
+                                        <div 
+                                            className="p-6 cursor-pointer hover:bg-purple-50 transition-colors"
+                                            onClick={() => setExpandedCustomer(isExpanded ? null : customer.id)}
+                                        >
+                                            <div className="flex justify-between items-start">
+                                                <div className="flex-1">
+                                                    <div className="flex items-center gap-3 mb-2 flex-wrap">
+                                                        <div className="text-2xl font-bold text-purple-900">{customer.name}</div>
+                                                        {pendingOrders.length > 0 && (
+                                                            <span className="bg-orange-500 text-white px-3 py-1 rounded-full text-sm font-bold">
+                                                                {pendingOrders.length} Pending
+                                                            </span>
+                                                        )}
+                                                        {overdueOrders.length > 0 && (
+                                                            <span className="bg-red-600 text-white px-3 py-1 rounded-full text-sm font-bold animate-pulse">
+                                                                ⚠️ {overdueOrders.length} Overdue
+                                                            </span>
+                                                        )}
+                                                    </div>
+                                                    <div className="text-lg text-gray-600 mb-2">📞 {customer.phone}</div>
+                                                    <div className="flex gap-4 text-sm flex-wrap">
+                                                        <span className="text-gray-600">Total Orders: <span className="font-bold text-gray-900">{customerOrders.length}</span></span>
+                                                        {totalBalance > 0 && (
+                                                            <span className="text-red-600">Balance Due: <span className="font-bold">₹{totalBalance}</span></span>
+                                                        )}
+                                                    </div>
+                                                </div>
+                                                <div className="flex items-center gap-2">
+                                                    {isExpanded ? <ChevronUp size={24} /> : <ChevronDown size={24} />}
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        {/* Order History */}
+                                        {isExpanded && customerOrders.length > 0 && (
+                                            <div className="border-t-2 border-purple-200 bg-purple-50 p-6">
+                                                <h3 className="text-xl font-bold text-purple-900 mb-4">Order History</h3>
+                                                <div className="space-y-3">
+                                                    {customerOrders.map(order => {
+                                                        const orderIsOverdue = isOrderOverdue(order);
+                                                        return (
+                                                            <div key={order.id} className={`bg-white p-4 rounded-lg border-2 ${orderIsOverdue ? 'border-red-500 bg-red-50' : order.delivered ? 'border-green-300' : 'border-orange-300'}`}>
+                                                                <div className="flex justify-between items-start mb-3">
+                                                                    <div>
+                                                                        <div className="flex items-center gap-3 mb-2 flex-wrap">
+                                                                            <div className="bg-blue-600 text-white px-4 py-2 rounded-lg text-xl font-bold">
+                                                                                Card #{order.cardNumber}
+                                                                            </div>
+                                                                            {order.readyDate && (
+                                                                                <div className={`text-sm font-semibold ${orderIsOverdue ? 'text-red-700' : 'text-gray-600'}`}>
+                                                                                    ⏰ Ready: {order.readyDate} {orderIsOverdue && '⚠️ OVERDUE'}
+                                                                                </div>
+                                                                            )}
+                                                                        </div>
+                                                                        <div className="text-sm text-gray-600">📅 {order.date}</div>
+                                                                    </div>
+                                                                    <div className="flex items-center gap-4">
+                                                                        <div className="text-right">
+                                                                            <div className="text-sm text-gray-600">Total: ₹{order.total}</div>
+                                                                            <div className="text-sm text-gray-600">Advance: ₹{order.advance}</div>
+                                                                            <div className="text-lg font-bold text-red-600">Balance: ₹{order.balance}</div>
+                                                                        </div>
+                                                                        <label className="toggle-switch">
+                                                                            <input 
+                                                                                type="checkbox" 
+                                                                                checked={order.delivered || false}
+                                                                                onChange={() => toggleOrderStatus(order.id)}
+                                                                            />
+                                                                            <span className="slider"></span>
+                                                                        </label>
+                                                                    </div>
+                                                                </div>
+                                                                
+                                                                {/* Items */}
+                                                                <div className="bg-gray-50 p-3 rounded mt-2">
+                                                                    <div className="text-sm font-semibold text-gray-700 mb-2">Items:</div>
+                                                                    {order.items.map((item, idx) => (
+                                                                        <div key={idx} className="text-sm text-gray-600">
+                                                                            {item.shirts && `Shirts: ${item.shirts}`}
+                                                                            {item.shirts && item.pants && ' | '}
+                                                                            {item.pants && `Pants: ${item.pants}`}
+                                                                            {(item.shirts || item.pants) && ` - ₹${item.amount}`}
+                                                                        </div>
+                                                                    ))}
+                                                                </div>
+
+                                                                <div className="mt-2 flex items-center gap-2">
+                                                                    <span className={`px-3 py-1 rounded-full text-sm font-bold ${order.delivered ? 'bg-green-100 text-green-700' : orderIsOverdue ? 'bg-red-100 text-red-700' : 'bg-orange-100 text-orange-700'}`}>
+                                                                        {order.delivered ? '✓ Delivered' : orderIsOverdue ? '⚠️ Overdue' : '⏳ Pending'}
+                                                                    </span>
+                                                                </div>
+                                                            </div>
+                                                        );
+                                                    })}
+                                                </div>
+                                            </div>
+                                        )}
+                                    </div>
+                                );
+                            })
+                        )}
+                    </div>
                 </div>
             );
         }
-        
-        // --- PoloFashionsBill Component (The Home Page - Unchanged in logic) ---
-        function PoloFashionsBill({ setPage }) {
-            const [readyDate, setReadyDate] = useState('');
+
+        // Home Page (Bill Creation)
+        function HomePage({ onOpenDatabase, customers, setCustomers, orders, setOrders }) {
             const [cardNumber, setCardNumber] = useState('');
+            const [customerName, setCustomerName] = useState('');
             const [phoneNumber, setPhoneNumber] = useState('');
             const [date, setDate] = useState(new Date().toISOString().split('T')[0]);
+            const [readyDate, setReadyDate] = useState('');
             const [items, setItems] = useState([{ shirts: '', pants: '', amount: '' }]);
             const [advance, setAdvance] = useState('');
+            const [showCustomers, setShowCustomers] = useState(false);
+            const [selectedCustomer, setSelectedCustomer] = useState(null);
             const billRef = useRef(null);
 
-            const searchCustomerCard = () => {
-                if (!phoneNumber || phoneNumber.length < 10) {
-                    alert('10 ಅಂಕಿಯ ಫೋನ್ ಸಂಖ್ಯೆಯನ್ನು ನಮೂದಿಸಿ\nPlease enter customer phone number (10 digits)');
-                    return;
-                }
-                const storedCardNumber = loadCustomerCardNumber(phoneNumber);
-                if (storedCardNumber) {
-                    setCardNumber(storedCardNumber);
-                    alert(`Card Number found for ${phoneNumber}: ${storedCardNumber}`);
-                } else {
-                    setCardNumber('');
-                    alert(`No previous Card Number found for ${phoneNumber}.`);
-                }
-            };
-            
-            const calculateTotal = () => {
-                return items.reduce((sum, item) => sum + (parseFloat(item.amount) || 0), 0);
-            };
-
-            const calculateBalance = () => {
-                const total = calculateTotal();
-                const adv = parseFloat(advance) || 0;
-                return total - adv;
-            };
-            
             const addItem = () => {
                 setItems([...items, { shirts: '', pants: '', amount: '' }]);
             };
@@ -351,36 +526,84 @@
                 setItems(newItems);
             };
 
-            const generateBillData = () => ({
-                readyDate,
-                cardNumber,
-                phoneNumber,
-                date,
-                items,
-                total: calculateTotal(),
-                advance: parseFloat(advance) || 0,
-                balance: calculateBalance()
-            });
-            
-            const downloadBillImage = async () => {
-                const element = billRef.current;
-                const canvas = await html2canvas(element, { scale: 2, backgroundColor: '#ffffff', logging: false });
+            const calculateTotal = () => {
+                return items.reduce((sum, item) => sum + (parseFloat(item.amount) || 0), 0);
+            };
 
-                return new Promise((resolve) => {
-                    canvas.toBlob((blob) => {
-                        const url = URL.createObjectURL(blob);
-                        const link = document.createElement('a');
-                        link.href = url;
-                        link.download = `Bill_${cardNumber || 'new'}_${date}.png`;
-                        link.click();
-                        URL.revokeObjectURL(url);
-                        resolve();
-                    });
-                });
+            const calculateBalance = () => {
+                const total = calculateTotal();
+                const adv = parseFloat(advance) || 0;
+                return total - adv;
+            };
+
+            const searchCustomers = (phone) => {
+                if (phone.length >= 3) {
+                    return customers.filter(c => c.phone.includes(phone));
+                }
+                return [];
+            };
+
+            const selectCustomer = (customer) => {
+                setPhoneNumber(customer.phone);
+                setCustomerName(customer.name);
+                setSelectedCustomer(customer);
+                setShowCustomers(false);
+            };
+
+            const saveOrder = () => {
+                let customer = customers.find(c => c.phone === phoneNumber);
+                
+                if (!customer) {
+                    customer = {
+                        id: Date.now().toString(),
+                        name: customerName,
+                        phone: phoneNumber,
+                        createdAt: new Date().toISOString()
+                    };
+                    const updatedCustomers = [...customers, customer];
+                    setCustomers(updatedCustomers);
+                    localStorage.setItem('polo_customers', JSON.stringify(updatedCustomers));
+                }
+
+                const order = {
+                    id: Date.now().toString(),
+                    cardNumber,
+                    customerId: customer.id,
+                    customerName: customer.name,
+                    customerPhone: customer.phone,
+                    date,
+                    readyDate,
+                    items: [...items],
+                    total: calculateTotal(),
+                    advance: parseFloat(advance) || 0,
+                    balance: calculateBalance(),
+                    delivered: false,
+                    createdAt: new Date().toISOString()
+                };
+
+                const updatedOrders = [...orders, order];
+                setOrders(updatedOrders);
+                localStorage.setItem('polo_orders', JSON.stringify(updatedOrders));
             };
 
             const downloadBill = async () => {
-                await downloadBillImage();
+                saveOrder();
+                
+                const element = billRef.current;
+                const canvas = await html2canvas(element, {
+                    scale: 2,
+                    backgroundColor: '#ffffff',
+                    logging: false
+                });
+
+                canvas.toBlob((blob) => {
+                    const url = URL.createObjectURL(blob);
+                    const link = document.createElement('a');
+                    link.href = url;
+                    link.download = `Bill_${cardNumber || 'new'}_${date}.png`;
+                    link.click();
+                    URL.revokeObjectURL(url);
+                });
             };
 
             const shareBill = async () => {
@@ -388,23 +611,17 @@
                     alert('10 ಅಂಕಿಯ ಫೋನ್ ಸಂಖ್ಯೆಯನ್ನು ನಮೂದಿಸಿ\nPlease enter customer phone number (10 digits)');
                     return;
                 }
-                if (!cardNumber) {
-                     alert('Please enter a Card Number before sharing.');
-                     return;
-                }
-                
-                const billData = generateBillData();
-                saveBillToHistory(billData); 
-                saveCustomerCardNumber(phoneNumber, cardNumber); 
 
-                await downloadBillImage(); 
+                saveOrder();
+                await downloadBill();
 
                 let formattedPhone = phoneNumber.replace(/\D/g, '');
                 if (formattedPhone.length === 10) {
                     formattedPhone = '91' + formattedPhone;
                 }
 
-                const message = `Hi! Your bill from Polo Fashions is ready.\n\nCard No: ${cardNumber}\nDate: ${date}\nReady By: ${readyDate || 'To be Confirmed'}\nTotal: ₹${calculateTotal()}\nAdvance: ₹${advance || 0}\nBalance: ₹${calculateBalance()}\n\n🧾 Your digital Card is generated. Please check it once.`;
+                const readyDateText = readyDate ? `\nReady By: ${readyDate}` : '';
+                const message = `Hi ${customerName}! Your bill from Polo Fashions is ready.\n\nCard No: ${cardNumber}\nDate: ${date}${readyDateText}\nTotal: ₹${calculateTotal()}\nAdvance: ₹${advance || 0}\nBalance: ₹${calculateBalance()}\n\n🧾 Your digital Card is generated. Please check it once.\n\nThank you for choosing Polo Fashions!`;
 
                 const whatsappUrl = `https://wa.me/${formattedPhone}?text=${encodeURIComponent(message)}`;
                 window.open(whatsappUrl, '_blank');
@@ -415,21 +632,16 @@
                     alert('10 ಅಂಕಿಯ ಫೋನ್ ಸಂಖ್ಯೆಯನ್ನು ನಮೂದಿಸಿ\nPlease enter customer phone number (10 digits)');
                     return;
                 }
-                 if (!cardNumber) {
-                     alert('Please enter a Card Number before sharing.');
-                     return;
-                }
 
-                const billData = generateBillData();
-                saveBillToHistory(billData); 
-                saveCustomerCardNumber(phoneNumber, cardNumber); 
+                saveOrder();
 
                 let formattedPhone = phoneNumber.replace(/\D/g, '');
                 if (formattedPhone.length === 10) {
                     formattedPhone = '+91' + formattedPhone;
                 }
 
-                const message = `Hi! Your bill from Polo Fashions is ready.\n\nCard No: ${cardNumber}\nDate: ${date}\nReady By: ${readyDate || 'TBD'}\nTotal: Rs.${calculateTotal()}\nAdvance: Rs.${advance || 0}\nBalance: Rs.${calculateBalance()}\n\nYour digital Card is generated. Please check it once.\n\nPolo Fashions\nMob: 9742445626`;
+                const readyDateText = readyDate ? `\nReady By: ${readyDate}` : '';
+                const message = `Hi ${customerName}! Your bill from Polo Fashions is ready.\n\nCard No: ${cardNumber}\nDate: ${date}${readyDateText}\nTotal: Rs.${calculateTotal()}\nAdvance: Rs.${advance || 0}\nBalance: Rs.${calculateBalance()}\n\nYour digital Card is generated.\n\nPolo Fashions\nMob: 9742445626`;
 
                 const smsUrl = `sms:${formattedPhone}?body=${encodeURIComponent(message)}`;
                 window.open(smsUrl, '_self');
@@ -437,228 +649,343 @@
 
             const clearForm = () => {
                 setCardNumber('');
+                setCustomerName('');
                 setPhoneNumber('');
-                setReadyDate('');
                 setDate(new Date().toISOString().split('T')[0]);
+                setReadyDate('');
                 setItems([{ shirts: '', pants: '', amount: '' }]);
                 setAdvance('');
+                setSelectedCustomer(null);
+            };
+
+            const isOverdue = () => {
+                if (!readyDate) return false;
+                return new Date(readyDate) < new Date();
             };
 
             return (
                 <div className="app-container">
                     <div className="card">
-                        <h1 className="text-3xl font-bold text-center mb-8 text-blue-900 flex items-center justify-center gap-3">
-                            <Home size={32} /> Home - New Bill
-                        </h1>
-                        <button
-                            onClick={() => setPage('history')}
-                            className="w-full mb-6 bg-purple-600 text-white py-3 px-6 rounded-xl text-lg font-bold hover:bg-purple-700 flex items-center justify-center gap-3"
-                        >
-                            <Clock size={24} /> View Bill History
-                        </button>
+                        <div className="flex justify-between items-center mb-8">
+                            <h1 className="text-2xl font-bold text-blue-900">
+                                👔 Polo Fashions
+                            </h1>
+                            <button
+                                onClick={onOpenDatabase}
+                                className="flex items-center gap-2 bg-purple-600 text-white px-4 py-2 rounded-xl text-sm font-bold hover:bg-purple-700"
+                            >
+                                <Users size={20} />
+                                Database
+                            </button>
+                        </div>
 
                         <div className="space-y-6 mb-8">
                             {/* Card Number */}
-                            <div className="bg-blue-50 p-6 rounded-xl border-4 border-blue-500">
-                                <label className="block text-2xl font-bold mb-3 text-blue-900">
+                            <div className="bg-blue-50 p-4 rounded-xl border-2 border-blue-500">
+                                <label className="block text-lg font-bold mb-2 text-blue-900">
                                     📋 Card Number
                                 </label>
                                 <input
                                     type="text"
                                     value={cardNumber}
                                     onChange={(e) => setCardNumber(e.target.value)}
-                                    className="w-full text-4xl font-bold p-4 border-4 border-blue-600 rounded-lg text-center"
+                                    className="w-full text-2xl font-bold p-3 border-2 border-blue-600 rounded-lg text-center"
                                     placeholder="123"
                                 />
                             </div>
 
-                            {/* Customer Phone Number with Search Button */}
-                            <div className="bg-green-50 p-6 rounded-xl border-4 border-green-500">
-                                <label className="block text-2xl font-bold mb-3 text-green-900">
+                            {/* Customer Name */}
+                            <div className="bg-orange-50 p-4 rounded-xl border-2 border-orange-500">
+                                <label className="block text-lg font-bold mb-2 text-orange-900">
+                                    👤 Customer Name
+                                </label>
+                                <input
+                                    type="text"
+                                    value={customerName}
+                                    onChange={(e) => setCustomerName(e.target.value)}
+                                    className="w-full text-xl font-bold p-3 border-2 border-orange-600 rounded-lg text-center"
+                                    placeholder="Enter name"
+                                />
+                            </div>
+
+                            {/* Phone Number with Auto-suggest */}
+                            <div className="bg-green-50 p-4 rounded-xl border-2 border-green-500 relative">
+                                <label className="block text-lg font-bold mb-2 text-green-900">
                                     📞 Customer Phone Number
                                 </label>
-                                <div className="flex flex-col md:flex-row gap-2">
-                                    <input
-                                        type="tel"
-                                        value={phoneNumber}
-                                        onChange={(e) => setPhoneNumber(e.target.value)}
-                                        className="w-full text-4xl font-bold p-4 border-4 border-green-600 rounded-lg text-center"
-                                        placeholder="9876543210"
-                                        maxLength="10"
-                                    />
-                                    <button
-                                        onClick={searchCustomerCard}
-                                        className="bg-green-700 text-white p-4 rounded-lg flex flex-col items-center justify-center text-sm md:text-base hover:bg-green-800 w-full md:w-auto"
-                                    >
-                                        <Search size={24} />
-                                        <span>Get Card No.</span>
-                                    </button>
-                                </div>
+                                <input
+                                    type="tel"
+                                    value={phoneNumber}
+                                    onChange={(e) => {
+                                        setPhoneNumber(e.target.value);
+                                        setShowCustomers(e.target.value.length >= 3);
+                                    }}
+                                    className="w-full text-2xl font-bold p-3 border-2 border-green-600 rounded-lg text-center"
+                                    placeholder="9876543210"
+                                    maxLength="10"
+                                />
+                                {showCustomers && searchCustomers(phoneNumber).length > 0 && (
+                                    <div className="customer-suggestion mt-2">
+                                        {searchCustomers(phoneNumber).map(customer => (
+                                            <div
+                                                key={customer.id}
+                                                className="customer-item"
+                                                onClick={() => selectCustomer(customer)}
+                                            >
+                                                <div className="font-bold">{customer.name}</div>
+                                                <div className="text-sm text-gray-600">{customer.phone}</div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                )}
                             </div>
 
                             {/* Date and Ready Date */}
-                            <div className="flex flex-col gap-4 md:grid md:grid-cols-2">
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                 <div>
-                                    <label className="block text-xl font-semibold mb-2">📅 Order Date</label>
+                                    <label className="block text-base font-semibold mb-2">📅 Order Date</label>
                                     <input
                                         type="date"
                                         value={date}
                                         onChange={(e) => setDate(e.target.value)}
-                                        className="w-full text-xl p-3 border-2 border-gray-300 rounded-lg"
+                                        className="w-full text-base p-2 border-2 border-gray-300 rounded-lg"
                                     />
                                 </div>
-                                <div>
-                                    <label className="block text-xl font-semibold mb-2 text-red-700">🗓️ Delivery Date</label>
+                                <div className={`${isOverdue() ? 'bg-red-50 p-2 rounded-lg' : ''}`}>
+                                    <label className="block text-base font-semibold mb-2 flex items-center gap-2">
+                                        <Clock size={20} />
+                                        Ready By {isOverdue() && <span className="text-red-600 font-bold text-sm">⚠️</span>}
+                                    </label>
                                     <input
                                         type="date"
                                         value={readyDate}
                                         onChange={(e) => setReadyDate(e.target.value)}
-                                        className="w-full text-xl p-3 border-2 border-red-500 rounded-lg"
+                                        className={`w-full text-base p-2 border-2 rounded-lg ${isOverdue() ? 'border-red-500' : 'border-gray-300'}`}
                                     />
                                 </div>
                             </div>
 
                             {/* Items */}
                             <div>
-                                <div className="flex justify-between items-center mb-4">
-                                    <label className="text-xl font-bold">🛍️ Items</label>
+                                <div className="flex justify-between items-center mb-3">
+                                    <label className="text-base font-bold">🛍️ Items</label>
                                     <button
                                         onClick={addItem}
-                                        className="bg-green-600 text-white px-4 py-2 sm:px-6 sm:py-3 rounded-lg text-lg hover:bg-green-700 flex items-center gap-2"
+                                        className="bg-green-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-green-700 flex items-center gap-2"
                                     >
-                                        <Plus size={24} /> Add Item
+                                        <Plus size={20} /> Add
                                     </button>
                                 </div>
 
                                 {items.map((item, index) => (
-                                    <div key={index} className="grid grid-cols-1 md:grid-cols-4 gap-3 mb-3 bg-gray-50 p-4 rounded-lg">
-                                        <input type="text" value={item.shirts} onChange={(e) => updateItem(index, 'shirts', e.target.value)} className="p-3 border-2 border-gray-300 rounded text-lg" placeholder="Shirts" />
-                                        <input type="text" value={item.pants} onChange={(e) => updateItem(index, 'pants', e.target.value)} className="p-3 border-2 border-gray-300 rounded text-lg" placeholder="Pants" />
-                                        <input type="number" value={item.amount} onChange={(e) => updateItem(index, 'amount', e.target.value)} className="p-3 border-2 border-gray-300 rounded text-lg font-bold" placeholder="₹ Amount" />
-                                        <button onClick={() => removeItem(index)} className="p-3 bg-red-500 text-white rounded hover:bg-red-600 flex items-center justify-center h-full" disabled={items.length === 1}>
-                                            <Trash2 size={20} /> <span className="md:hidden">Remove</span>
+                                    <div key={index} className="grid grid-cols-4 gap-2 mb-2 bg-gray-50 p-3 rounded-lg">
+                                        <input
+                                            type="text"
+                                            value={item.shirts}
+                                            onChange={(e) => updateItem(index, 'shirts', e.target.value)}
+                                            className="p-2 border-2 border-gray-300 rounded text-sm"
+                                            placeholder="Shirts"
+                                        />
+                                        <input
+                                            type="text"
+                                            value={item.pants}
+                                            onChange={(e) => updateItem(index, 'pants', e.target.value)}
+                                            className="p-2 border-2 border-gray-300 rounded text-sm"
+                                            placeholder="Pants"
+                                        />
+                                        <input
+                                            type="number"
+                                            value={item.amount}
+                                            onChange={(e) => updateItem(index, 'amount', e.target.value)}
+                                            className="p-2 border-2 border-gray-300 rounded text-sm font-bold"
+                                            placeholder="₹"
+                                        />
+                                        <button
+                                            onClick={() => removeItem(index)}
+                                            className="p-2 bg-red-500 text-white rounded hover:bg-red-600 flex items-center justify-center"
+                                            disabled={items.length === 1}
+                                        >
+                                            <Trash2 size={16} />
                                         </button>
                                     </div>
                                 ))}
                             </div>
 
                             {/* Totals */}
-                            <div className="grid grid-cols-3 gap-4">
-                                <div className="bg-gray-50 p-4 rounded-lg border-2 border-gray-300">
-                                    <label className="block text-lg font-semibold mb-2">Total</label>
-                                    <div className="text-3xl font-bold text-gray-800">₹{calculateTotal().toFixed(0)}</div>
+                            <div className="grid grid-cols-3 gap-2">
+                                <div className="bg-gray-50 p-3 rounded-lg border-2 border-gray-300">
+                                    <label className="block text-sm font-semibold mb-1">Total</label>
+                                    <div className="text-xl font-bold text-gray-800">
+                                        ₹{calculateTotal().toFixed(0)}
+                                    </div>
                                 </div>
-                                <div className="bg-blue-50 p-4 rounded-lg border-2 border-blue-400">
-                                    <label className="block text-lg font-semibold mb-2">Advance</label>
-                                    <input type="number" value={advance} onChange={(e) => setAdvance(e.target.value)} className="w-full text-2xl font-bold p-2 border-2 border-blue-500 rounded" placeholder="0" />
+                                <div className="bg-blue-50 p-3 rounded-lg border-2 border-blue-400">
+                                    <label className="block text-sm font-semibold mb-1">Advance</label>
+                                    <input
+                                        type="number"
+                                        value={advance}
+                                        onChange={(e) => setAdvance(e.target.value)}
+                                        className="w-full text-lg font-bold p-1 border-2 border-blue-500 rounded"
+                                        placeholder="0"
+                                    />
                                 </div>
-                                <div className="bg-red-50 p-4 rounded-lg border-2 border-red-400">
-                                    <label className="block text-lg font-semibold mb-2">Balance</label>
-                                    <div className="text-3xl font-bold text-red-600">₹{calculateBalance().toFixed(0)}</div>
+                                <div className="bg-red-50 p-3 rounded-lg border-2 border-red-400">
+                                    <label className="block text-sm font-semibold mb-1">Balance</label>
+                                    <div className="text-xl font-bold text-red-600">
+                                        ₹{calculateBalance().toFixed(0)}
+                                    </div>
                                 </div>
                             </div>
                         </div>
 
                         {/* Buttons */}
-                        <div className="grid grid-cols-2 gap-4 mb-4">
-                            <button onClick={downloadBill} className="flex flex-col items-center justify-center gap-2 bg-blue-600 text-white py-4 px-6 rounded-xl text-lg font-bold hover:bg-blue-700">
-                                <Download size={32} /><span>Download</span>
+                        <div className="grid grid-cols-2 gap-3 mb-3">
+                            <button
+                                onClick={downloadBill}
+                                className="flex flex-col items-center justify-center gap-1 bg-blue-600 text-white py-3 px-4 rounded-xl text-sm font-bold hover:bg-blue-700"
+                            >
+                                <Download size={24} />
+                                <span>Download</span>
                             </button>
-                            <button onClick={clearForm} className="flex flex-col items-center justify-center gap-2 bg-gray-600 text-white py-4 px-6 rounded-xl text-lg font-bold hover:bg-gray-700">
-                                <Trash2 size={32} /><span>Clear All</span>
+                            <button
+                                onClick={clearForm}
+                                className="flex flex-col items-center justify-center gap-1 bg-gray-600 text-white py-3 px-4 rounded-xl text-sm font-bold hover:bg-gray-700"
+                            >
+                                <Trash2 size={24} />
+                                <span>Clear All</span>
                             </button>
                         </div>
-                        <div className="grid grid-cols-2 gap-4">
-                            <button onClick={shareBill} className="flex flex-col items-center justify-center gap-2 bg-green-600 text-white py-4 px-6 rounded-xl text-lg font-bold hover:bg-green-700">
-                                <Share2 size={32} /><span>Send WhatsApp</span>
+                        <div className="grid grid-cols-2 gap-3">
+                            <button
+                                onClick={shareBill}
+                                className="flex flex-col items-center justify-center gap-1 bg-green-600 text-white py-3 px-4 rounded-xl text-sm font-bold hover:bg-green-700"
+                            >
+                                <Share2 size={24} />
+                                <span>WhatsApp</span>
                             </button>
-                            <button onClick={shareSMS} className="flex flex-col items-center justify-center gap-2 bg-purple-600 text-white py-4 px-6 rounded-xl text-lg font-bold hover:bg-purple-700">
-                                <MessageSquare size={32} /><span>Send SMS</span>
+                            <button
+                                onClick={shareSMS}
+                                className="flex flex-col items-center justify-center gap-1 bg-purple-600 text-white py-3 px-4 rounded-xl text-sm font-bold hover:bg-purple-700"
+                            >
+                                <MessageSquare size={24} />
+                                <span>SMS</span>
                             </button>
                         </div>
                     </div>
 
-                    {/* Bill Preview - FINAL FIX APPLIED HERE */}
-                    <div className="bill-preview max-w-full overflow-hidden">
-                        <h2 className="text-xl font-bold text-center mb-4 text-gray-700">
+                    {/* Bill Preview */}
+                    <div className="bill-preview">
+                        <h2 className="text-2xl font-bold text-center mb-6 text-gray-700">
                             👇 Bill Preview 👇
                         </h2>
-                        {/* FIX: Added w-full to ensure it uses 100% of the space */}
-                        <div ref={billRef} className="bg-white p-4 w-full card-bill shadow-xl rounded-lg">
-                            
-                            <div className="mb-3 bill-card-section"> 
+                        <div ref={billRef} className="bg-white p-8 card-bill">
+                            <div className="bill-border mb-4 name-card">
                                 <div className="text-center">
-                                    <div className="text-xs mb-1 text-black">✋ We are not responsible for stitched cloths after 3 Months</div>
-                                    <div className="text-3xl font-bold text-blue-900 mb-1">ಪೋಲೋ ಫ್ಯಾಷನ್ಸ್</div>
-                                    <div className="text-3xl font-bold my-3 text-blue-900">Card no:
-                                        {cardNumber || '___'}
+                                    <div className="text-sm mb-2">
+                                        ✋ We are not responsible for stitched cloths after 3 Months
                                     </div>
-                                    <div className="text-xl font-semibold mb-1">Phone: <span className="text-blue-700">{phoneNumber || 'N/A'}</span></div>
-                                    <div className="text-xl font-semibold text-black mb-1">Delivery Date: <span className="font-bold text-red-600-modified">{readyDate || 'To be Confirmed'}</span></div>
-                                    <div className="text-xl font-semibold mb-1 text-black">Date: {date}</div>
+                                    <div className="text-4xl font-bold text-blue-900 mb-2">ಪೋಲೋ ಫ್ಯಾಷನ್ಸ್</div>
+                                    <div className="text-4xl font-bold my-4 text-blue-900">Card no: {cardNumber || '___'}</div>
+                                    <div className="text-2xl font-semibold mb-2">{customerName || 'Customer Name'}</div>
+                                    <div className="text-xl mb-1">📞 {phoneNumber || '___________'}</div>
+                                    <div className="text-xl">📅 Date: {date}</div>
+                                    {readyDate && (
+                                        <div className={`text-xl mt-2 font-bold ${isOverdue() ? 'text-red-600' : 'text-green-700'}`}>
+                                            ⏰ Ready By: {readyDate}
+                                        </div>
+                                    )}
                                 </div>
                             </div>
 
-                            <div className="mb-3 overflow-hidden bill-card-section">
+                            <div className="bill-border mb-4 overflow-hidden">
                                 <table className="w-full">
                                     <thead className="bg-blue-900 text-white">
                                         <tr>
-                                            <th className="p-2 text-left text-base">Sr.</th>
-                                            <th className="p-2 text-center text-base">SHIRTS</th>
-                                            <th className="p-2 text-center text-base">PANTS</th>
-                                            <th className="p-2 text-right text-base">Amount</th>
+                                            <th className="p-3 text-left text-lg">Sr.</th>
+                                            <th className="p-3 text-center text-lg">SHIRTS</th>
+                                            <th className="p-3 text-center text-lg">PANTS</th>
+                                            <th className="p-3 text-right text-lg">Amount</th>
                                         </tr>
                                     </thead>
                                     <tbody>
                                         {items.map((item, index) => (
                                             <tr key={index} className="border-b-2 border-blue-900">
-                                                <td className="p-2 text-base text-black">{index + 1}</td>
-                                                <td className="p-2 text-center text-base text-black">{item.shirts}</td>
-                                                <td className="p-2 text-center text-base text-black">{item.pants}</td>
-                                                <td className="p-2 text-right text-base font-semibold text-black">{item.amount}</td>
+                                                <td className="p-3 text-lg">{index + 1}</td>
+                                                <td className="p-3 text-center text-lg">{item.shirts}</td>
+                                                <td className="p-3 text-center text-lg">{item.pants}</td>
+                                                <td className="p-3 text-right text-lg font-semibold">
+                                                    {item.amount}
+                                                </td>
                                             </tr>
                                         ))}
                                     </tbody>
                                 </table>
                             </div>
 
-                            <div className="bill-card-section">
-                                <div className="flex justify-between text-xl font-bold mb-2 text-black">
+                            <div className="bill-border">
+                                <div className="flex justify-between text-2xl font-bold mb-3">
                                     <span>Total:</span>
                                     <span>₹{calculateTotal().toFixed(0)}</span>
                                 </div>
-                                <div className="flex justify-between text-xl font-bold mb-2 text-black">
+                                <div className="flex justify-between text-2xl font-bold mb-3">
                                     <span>Advance:</span>
                                     <span>₹{advance || '0'}</span>
                                 </div>
-                                <div className="flex justify-between text-2xl font-bold text-red-600-modified pt-2 border-t-2 border-blue-900">
+                                <div className="flex justify-between text-3xl font-bold text-red-600 pt-3 border-t-2 border-blue-900">
                                     <span>Balance:</span>
                                     <span>₹{calculateBalance().toFixed(0)}</span>
                                 </div>
                             </div>
 
-                            <div className="mt-4 text-center bill-card-section">
-                                <div className="text-2xl font-bold text-blue-900 mb-1">POLO FASHIONS</div>
-                                <div className="text-sm text-black">Get Your Dress Ready in as soon as 1–2 Hours – Only at Polo Fashions!</div>
-                                <div className="text-sm text-black">#GF-30, Anjuman-Eslamiya Complex, T.V.S. Road</div>
-                                <div className="text-sm text-black">Kollegal-571 440</div>
-                                <div className="text-base font-bold mt-1 text-blue-900">Mob: 9742445626</div>
+                            <div className="mt-6 text-center bill-border address-card">
+                                <div className="text-4xl font-bold text-blue-900 mb-2">POLO FASHIONS</div>
+                                <div className="text-base">
+                                    Get Your Dress Ready in as soon as 1–2 Hours – Only at Polo Fashions!
+                                </div>
+                                <div className="text-base">#GF-30, Anjuman-Eslamiya Complex,</div>
+                                <div className="text-base">T.V.S. Road</div>
+                                <div className="text-base">Kollegal-571 440</div>
+                                <div className="text-lg font-bold mt-2">Mob: 9742445626</div>
                             </div>
                         </div>
                     </div>
                 </div>
             );
         }
-        
-        // --- Main App Component (Routing - Unchanged) ---
-        function App() {
-            const [page, setPage] = useState('home'); 
 
-            if (page === 'history') {
-                return <BillHistory setPage={setPage} />;
+        // Main App Component
+        function App() {
+            const [currentPage, setCurrentPage] = useState('home');
+            const [customers, setCustomers] = useState([]);
+            const [orders, setOrders] = useState([]);
+
+            useEffect(() => {
+                const savedCustomers = JSON.parse(localStorage.getItem('polo_customers') || '[]');
+                const savedOrders = JSON.parse(localStorage.getItem('polo_orders') || '[]');
+                setCustomers(savedCustomers);
+                setOrders(savedOrders);
+            }, []);
+
+            if (currentPage === 'database') {
+                return (
+                    <CustomerDatabase 
+                        onBack={() => setCurrentPage('home')}
+                        customers={customers}
+                        orders={orders}
+                        setOrders={setOrders}
+                    />
+                );
             }
 
-            return <PoloFashionsBill setPage={setPage} />;
+            return (
+                <HomePage 
+                    onOpenDatabase={() => setCurrentPage('database')}
+                    customers={customers}
+                    setCustomers={setCustomers}
+                    orders={orders}
+                    setOrders={setOrders}
+                />
+            );
         }
 
         // Render the app
