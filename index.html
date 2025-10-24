@@ -266,6 +266,7 @@
         function CustomerDatabase({ onBack, customers, orders, setOrders }) {
             const [searchQuery, setSearchQuery] = useState('');
             const [expandedCustomer, setExpandedCustomer] = useState(null);
+            const [viewingPhoto, setViewingPhoto] = useState(null);
 
             const filteredCustomers = customers.filter(customer => 
                 customer.phone.includes(searchQuery) || 
@@ -312,6 +313,28 @@
 
             return (
                 <div className="database-container">
+                    {/* Photo Viewer Modal */}
+                    {viewingPhoto && (
+                        <div 
+                            className="fixed inset-0 bg-black bg-opacity-90 z-50 flex items-center justify-center p-4"
+                            onClick={() => setViewingPhoto(null)}
+                        >
+                            <button
+                                onClick={() => setViewingPhoto(null)}
+                                className="absolute top-4 right-4 bg-red-600 text-white w-12 h-12 rounded-full flex items-center justify-center text-2xl font-bold hover:bg-red-700 z-10"
+                                style={{ fontSize: '24px' }}
+                            >
+                                ✕
+                            </button>
+                            <img
+                                src={viewingPhoto}
+                                alt="Measurement Full View"
+                                className="max-w-full max-h-full object-contain"
+                                onClick={(e) => e.stopPropagation()}
+                            />
+                        </div>
+                    )}
+                    
                     {/* Header */}
                     <div className="bg-white rounded-2xl shadow-xl p-6 mb-6">
                         <div className="flex justify-between items-center mb-4">
@@ -420,8 +443,8 @@
                                                         const orderIsOverdue = isOrderOverdue(order);
                                                         return (
                                                             <div key={order.id} className={`bg-white p-4 rounded-lg border-2 ${orderIsOverdue ? 'border-red-500 bg-red-50' : order.delivered ? 'border-green-300' : 'border-orange-300'}`}>
-                                                                <div className="flex justify-between items-start mb-3">
-                                                                    <div>
+                                                                <div className="flex justify-between items-start mb-3 flex-wrap gap-3">
+                                                                    <div className="flex-1 min-w-0">
                                                                         <div className="flex items-center gap-3 mb-2 flex-wrap">
                                                                             <div className="bg-blue-600 text-white px-4 py-2 rounded-lg text-xl font-bold">
                                                                                 Card #{order.cardNumber}
@@ -434,6 +457,7 @@
                                                                         </div>
                                                                         <div className="text-sm text-gray-600">📅 {order.date}</div>
                                                                     </div>
+                                                                    
                                                                     <div className="flex items-center gap-4">
                                                                         <div className="text-right">
                                                                             <div className="text-sm text-gray-600">Total: ₹{order.total}</div>
@@ -464,10 +488,24 @@
                                                                     ))}
                                                                 </div>
 
-                                                                <div className="mt-2 flex items-center gap-2">
+                                                                <div className="mt-2 flex items-center justify-between gap-2 flex-wrap">
                                                                     <span className={`px-3 py-1 rounded-full text-sm font-bold ${order.delivered ? 'bg-green-100 text-green-700' : orderIsOverdue ? 'bg-red-100 text-red-700' : 'bg-orange-100 text-orange-700'}`}>
                                                                         {order.delivered ? '✓ Delivered' : orderIsOverdue ? '⚠️ Overdue' : '⏳ Pending'}
                                                                     </span>
+                                                                    
+                                                                    {/* Measurement Photo Thumbnail - Moved Here */}
+                                                                    {order.measurementPhoto && (
+                                                                        <div className="flex-shrink-0">
+                                                                            <div className="text-xs text-gray-600 mb-1 text-center">📸 Measurement</div>
+                                                                            <img
+                                                                                src={order.measurementPhoto}
+                                                                                alt="Measurement"
+                                                                                className="w-20 h-20 object-cover rounded-lg border-2 border-blue-400 cursor-pointer hover:opacity-80 shadow-md"
+                                                                                onClick={() => setViewingPhoto(order.measurementPhoto)}
+                                                                                title="Click to view full size"
+                                                                            />
+                                                                        </div>
+                                                                    )}
                                                                 </div>
                                                             </div>
                                                         );
@@ -495,7 +533,9 @@
             const [advance, setAdvance] = useState('');
             const [showCustomers, setShowCustomers] = useState(false);
             const [selectedCustomer, setSelectedCustomer] = useState(null);
+            const [measurementPhoto, setMeasurementPhoto] = useState(null);
             const billRef = useRef(null);
+            const fileInputRef = useRef(null);
 
             const addItem = () => {
                 setItems([...items, { shirts: '', pants: '', amount: '' }]);
@@ -537,6 +577,24 @@
                 setShowCustomers(false);
             };
 
+            const handlePhotoUpload = (e) => {
+                const file = e.target.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onloadend = () => {
+                        setMeasurementPhoto(reader.result);
+                    };
+                    reader.readAsDataURL(file);
+                }
+            };
+
+            const removePhoto = () => {
+                setMeasurementPhoto(null);
+                if (fileInputRef.current) {
+                    fileInputRef.current.value = '';
+                }
+            };
+
             const saveOrder = () => {
                 let customer = customers.find(c => c.phone === phoneNumber);
                 
@@ -550,13 +608,22 @@
                     const updatedCustomers = [...customers, customer];
                     setCustomers(updatedCustomers);
                     localStorage.setItem('polo_customers', JSON.stringify(updatedCustomers));
+                } else {
+                    // Update existing customer name if it changed
+                    if (customer.name !== customerName) {
+                        const updatedCustomers = customers.map(c => 
+                            c.phone === phoneNumber ? { ...c, name: customerName } : c
+                        );
+                        setCustomers(updatedCustomers);
+                        localStorage.setItem('polo_customers', JSON.stringify(updatedCustomers));
+                    }
                 }
 
                 const order = {
                     id: Date.now().toString(),
                     cardNumber,
                     customerId: customer.id,
-                    customerName: customer.name,
+                    customerName: customerName,
                     customerPhone: customer.phone,
                     date,
                     readyDate,
@@ -565,6 +632,7 @@
                     advance: parseFloat(advance) || 0,
                     balance: calculateBalance(),
                     delivered: false,
+                    measurementPhoto: measurementPhoto,
                     createdAt: new Date().toISOString()
                 };
 
@@ -574,8 +642,6 @@
             };
 
             const downloadBill = async () => {
-                saveOrder();
-                
                 const element = billRef.current;
                 
                 // Temporarily set fixed width for capture
@@ -653,6 +719,10 @@
                 setItems([{ shirts: '', pants: '', amount: '' }]);
                 setAdvance('');
                 setSelectedCustomer(null);
+                setMeasurementPhoto(null);
+                if (fileInputRef.current) {
+                    fileInputRef.current.value = '';
+                }
             };
 
             const isOverdue = () => {
@@ -760,6 +830,44 @@
                                         className={`w-full text-base p-2 border-2 rounded-lg ${isOverdue() ? 'border-red-500' : 'border-gray-300'}`}
                                     />
                                 </div>
+                            </div>
+
+                            {/* Measurement Photo Upload */}
+                            <div className="bg-yellow-50 p-4 rounded-xl border-2 border-yellow-500">
+                                <label className="block text-lg font-bold mb-2 text-yellow-900">
+                                    📸 Measurement Photo (Optional)
+                                </label>
+                                <input
+                                    ref={fileInputRef}
+                                    type="file"
+                                    accept="image/*"
+                                    capture="environment"
+                                    onChange={handlePhotoUpload}
+                                    className="hidden"
+                                    id="photoUpload"
+                                />
+                                {!measurementPhoto ? (
+                                    <label
+                                        htmlFor="photoUpload"
+                                        className="w-full bg-yellow-600 text-white py-3 px-4 rounded-lg text-base font-bold hover:bg-yellow-700 cursor-pointer flex items-center justify-center gap-2"
+                                    >
+                                        📷 Take/Upload Photo
+                                    </label>
+                                ) : (
+                                    <div className="space-y-2">
+                                        <img
+                                            src={measurementPhoto}
+                                            alt="Measurement"
+                                            className="w-full h-48 object-cover rounded-lg border-2 border-yellow-600"
+                                        />
+                                        <button
+                                            onClick={removePhoto}
+                                            className="w-full bg-red-500 text-white py-2 px-4 rounded-lg text-sm font-bold hover:bg-red-600"
+                                        >
+                                            Remove Photo
+                                        </button>
+                                    </div>
+                                )}
                             </div>
 
                             {/* Items */}
