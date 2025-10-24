@@ -4,7 +4,6 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
-    <link rel="shortcut icon" href="/icon.jpg" type="image/x-icon">
     <title>Polo Fashions - Digital Bill</title>
 
     <!-- Tailwind CSS -->
@@ -49,12 +48,16 @@
         .card-bill {
             box-shadow: 0 4px 15px rgba(0,0,0,0.15);
             border-radius: 12px;
+            width: 600px;
             max-width: 100%;
+            margin: 0 auto;
             overflow: hidden;
+            padding: 32px;
+            box-sizing: border-box;
         }
         .bill-border {
             border: 2px solid #1e3a8a;
-            padding: 10px;
+            padding: 15px;
             border-radius: 8px;
             background: white;
         }
@@ -142,29 +145,11 @@
             .card {
                 padding: 12px;
             }
-            .card-bill {
-                padding: 12px;
-            }
             .bill-border {
-                padding: 8px;
+                padding: 15px;
             }
             h1 {
                 font-size: 1.5rem !important;
-            }
-            .text-4xl {
-                font-size: 1.75rem !important;
-            }
-            .text-3xl {
-                font-size: 1.5rem !important;
-            }
-            .text-2xl {
-                font-size: 1.25rem !important;
-            }
-            .text-xl {
-                font-size: 1rem !important;
-            }
-            .text-lg {
-                font-size: 0.95rem !important;
             }
         }
         
@@ -591,11 +576,21 @@
                 saveOrder();
                 
                 const element = billRef.current;
+                
+                // Temporarily set fixed width for capture
+                const originalWidth = element.style.width;
+                element.style.width = '600px';
+                
                 const canvas = await html2canvas(element, {
                     scale: 2,
                     backgroundColor: '#ffffff',
-                    logging: false
+                    logging: false,
+                    width: 600,
+                    windowWidth: 600
                 });
+                
+                // Restore original width
+                element.style.width = originalWidth;
 
                 canvas.toBlob((blob) => {
                     const url = URL.createObjectURL(blob);
@@ -879,42 +874,43 @@
                         <h2 className="text-2xl font-bold text-center mb-6 text-gray-700">
                             👇 Bill Preview 👇
                         </h2>
-                        <div ref={billRef} className="bg-white p-8 card-bill">
-                            <div className="bill-border mb-4 name-card">
+                        <div ref={billRef} className="bg-white card-bill">
+                            <div style={{fontSize: '12px'}} className="mb-2 text-center text-black">
+                                ✋ We are not responsible for stitched cloths after 3 Months
+                            </div>
+                            
+                            <div className="bill-border mb-3 name-card">
                                 <div className="text-center">
-                                    <div className="text-sm mb-2">
-                                        ✋ We are not responsible for stitched cloths after 3 Months
-                                    </div>
-                                    <div className="text-4xl font-bold text-blue-900 mb-2">ಪೋಲೋ ಫ್ಯಾಷನ್ಸ್</div>
-                                    <div className="text-4xl font-bold my-4 text-blue-900">Card no: {cardNumber || '___'}</div>
-                                    <div className="text-2xl font-semibold mb-2">{customerName || 'Customer Name'}</div>
-                                    <div className="text-xl mb-1">📞 {phoneNumber || '___________'}</div>
-                                    <div className="text-xl">📅 Date: {date}</div>
+                                    <div style={{fontSize: '32px'}} className="font-bold text-blue-900 mb-2">ಪೋಲೋ ಫ್ಯಾಷನ್ಸ್</div>
+                                    <div style={{fontSize: '32px'}} className="font-bold my-3 text-blue-900">Card no: {cardNumber || '___'}</div>
+                                    <div style={{fontSize: '22px'}} className="font-semibold mb-1">{customerName || 'Customer Name'}</div>
+                                    <div style={{fontSize: '18px'}} className="mb-1">📞 {phoneNumber || '___________'}</div>
+                                    <div style={{fontSize: '18px'}}>📅 Date: {date}</div>
                                     {readyDate && (
-                                        <div className={`text-xl mt-2 font-bold ${isOverdue() ? 'text-red-600' : 'text-green-700'}`}>
+                                        <div style={{fontSize: '18px'}} className={`mt-2 font-bold ${isOverdue() ? 'text-red-600' : 'text-green-700'}`}>
                                             ⏰ Ready By: {readyDate}
                                         </div>
                                     )}
                                 </div>
                             </div>
 
-                            <div className="bill-border mb-4 overflow-hidden">
+                            <div className="bill-border mb-3 overflow-hidden">
                                 <table className="w-full">
                                     <thead className="bg-blue-900 text-white">
                                         <tr>
-                                            <th className="p-3 text-left text-lg">Sr.</th>
-                                            <th className="p-3 text-center text-lg">SHIRTS</th>
-                                            <th className="p-3 text-center text-lg">PANTS</th>
-                                            <th className="p-3 text-right text-lg">Amount</th>
+                                            <th style={{fontSize: '16px'}} className="p-2 text-left">Sr.</th>
+                                            <th style={{fontSize: '16px'}} className="p-2 text-center">SHIRTS</th>
+                                            <th style={{fontSize: '16px'}} className="p-2 text-center">PANTS</th>
+                                            <th style={{fontSize: '16px'}} className="p-2 text-right">Amount</th>
                                         </tr>
                                     </thead>
                                     <tbody>
                                         {items.map((item, index) => (
                                             <tr key={index} className="border-b-2 border-blue-900">
-                                                <td className="p-3 text-lg">{index + 1}</td>
-                                                <td className="p-3 text-center text-lg">{item.shirts}</td>
-                                                <td className="p-3 text-center text-lg">{item.pants}</td>
-                                                <td className="p-3 text-right text-lg font-semibold">
+                                                <td style={{fontSize: '16px'}} className="p-2">{index + 1}</td>
+                                                <td style={{fontSize: '16px'}} className="p-2 text-center">{item.shirts}</td>
+                                                <td style={{fontSize: '16px'}} className="p-2 text-center">{item.pants}</td>
+                                                <td style={{fontSize: '16px'}} className="p-2 text-right font-semibold">
                                                     {item.amount}
                                                 </td>
                                             </tr>
@@ -923,30 +919,30 @@
                                 </table>
                             </div>
 
-                            <div className="bill-border">
-                                <div className="flex justify-between text-2xl font-bold mb-3">
+                            <div className="bill-border mb-3">
+                                <div style={{fontSize: '20px'}} className="flex justify-between font-bold mb-2">
                                     <span>Total:</span>
                                     <span>₹{calculateTotal().toFixed(0)}</span>
                                 </div>
-                                <div className="flex justify-between text-2xl font-bold mb-3">
+                                <div style={{fontSize: '20px'}} className="flex justify-between font-bold mb-2">
                                     <span>Advance:</span>
                                     <span>₹{advance || '0'}</span>
                                 </div>
-                                <div className="flex justify-between text-3xl font-bold text-red-600 pt-3 border-t-2 border-blue-900">
+                                <div style={{fontSize: '24px'}} className="flex justify-between font-bold text-red-600 pt-2 border-t-2 border-blue-900">
                                     <span>Balance:</span>
                                     <span>₹{calculateBalance().toFixed(0)}</span>
                                 </div>
                             </div>
 
-                            <div className="mt-6 text-center bill-border address-card">
-                                <div className="text-4xl font-bold text-blue-900 mb-2">POLO FASHIONS</div>
-                                <div className="text-base">
+                            <div className="text-center bill-border address-card">
+                                <div style={{fontSize: '32px'}} className="font-bold text-blue-900 mb-1">POLO FASHIONS</div>
+                                <div style={{fontSize: '14px'}}>
                                     Get Your Dress Ready in as soon as 1–2 Hours – Only at Polo Fashions!
                                 </div>
-                                <div className="text-base">#GF-30, Anjuman-Eslamiya Complex,</div>
-                                <div className="text-base">T.V.S. Road</div>
-                                <div className="text-base">Kollegal-571 440</div>
-                                <div className="text-lg font-bold mt-2">Mob: 9742445626</div>
+                                <div style={{fontSize: '14px'}}>#GF-30, Anjuman-Eslamiya Complex,</div>
+                                <div style={{fontSize: '14px'}}>T.V.S. Road</div>
+                                <div style={{fontSize: '14px'}}>Kollegal-571 440</div>
+                                <div style={{fontSize: '16px'}} className="font-bold mt-1">Mob: 9742445626</div>
                             </div>
                         </div>
                     </div>
