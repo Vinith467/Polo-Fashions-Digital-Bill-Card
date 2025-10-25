@@ -6,6 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
     <title>Polo Fashions - Digital Bill</title>
     <link rel="shortcut icon" href="/icon.jpg" type="image/x-icon">
+    
 
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -290,6 +291,23 @@
                 localStorage.setItem('polo_orders', JSON.stringify(updatedOrders));
             };
 
+            const deleteOrder = (orderId, customerId) => {
+                if (confirm('Are you sure you want to delete this order? This cannot be undone.')) {
+                    const updatedOrders = orders.filter(order => order.id !== orderId);
+                    setOrders(updatedOrders);
+                    localStorage.setItem('polo_orders', JSON.stringify(updatedOrders));
+                    
+                    // If customer has no more orders, optionally remove customer
+                    const customerHasOrders = updatedOrders.some(o => o.customerId === customerId);
+                    if (!customerHasOrders) {
+                        const updatedCustomers = customers.filter(c => c.id !== customerId);
+                        localStorage.setItem('polo_customers', JSON.stringify(updatedCustomers));
+                        // Refresh page to update customer list
+                        window.location.reload();
+                    }
+                }
+            };
+
             const getTotalPending = () => {
                 return orders.filter(o => !o.delivered).reduce((sum, o) => sum + o.balance, 0);
             };
@@ -442,28 +460,79 @@
                                                     {customerOrders.map(order => {
                                                         const orderIsOverdue = isOrderOverdue(order);
                                                         return (
-                                                            <div key={order.id} className={`bg-white p-4 rounded-lg border-2 ${orderIsOverdue ? 'border-red-500 bg-red-50' : order.delivered ? 'border-green-300' : 'border-orange-300'}`}>
-                                                                <div className="flex justify-between items-start mb-3 flex-wrap gap-3">
-                                                                    <div className="flex-1 min-w-0">
-                                                                        <div className="flex items-center gap-3 mb-2 flex-wrap">
-                                                                            <div className="bg-blue-600 text-white px-4 py-2 rounded-lg text-xl font-bold">
-                                                                                Card #{order.cardNumber}
-                                                                            </div>
+                                                            <div key={order.id} className={`bg-white rounded-lg border-2 overflow-hidden ${orderIsOverdue ? 'border-red-500' : order.delivered ? 'border-green-300' : 'border-orange-300'}`}>
+                                                                {/* Card Number Header - Full Width */}
+                                                                <div className="bg-blue-600 text-white px-3 py-2">
+                                                                    <span className="text-lg font-bold">Card #{order.cardNumber}</span>
+                                                                </div>
+                                                                
+                                                                {/* Body Content */}
+                                                                <div className="p-3">
+                                                                    {/* Dates with Delete Button */}
+                                                                    <div className="flex items-start justify-between mb-2 pb-2 border-b border-gray-200">
+                                                                        <div className="flex-1 text-xs">
+                                                                            <div className="text-gray-600">📅 {order.date}</div>
                                                                             {order.readyDate && (
-                                                                                <div className={`text-sm font-semibold ${orderIsOverdue ? 'text-red-700' : 'text-gray-600'}`}>
-                                                                                    ⏰ Ready: {order.readyDate} {orderIsOverdue && '⚠️ OVERDUE'}
+                                                                                <div className={`font-semibold ${orderIsOverdue ? 'text-red-600' : 'text-gray-600'}`}>
+                                                                                    ⏰ {order.readyDate} {orderIsOverdue && '⚠️'}
                                                                                 </div>
                                                                             )}
                                                                         </div>
-                                                                        <div className="text-sm text-gray-600">📅 {order.date}</div>
+                                                                        <button
+                                                                            onClick={() => deleteOrder(order.id, order.customerId)}
+                                                                            className="bg-red-500 hover:bg-red-600 text-white p-1.5 rounded ml-2"
+                                                                            title="Delete"
+                                                                        >
+                                                                            <Trash2 size={14} />
+                                                                        </button>
                                                                     </div>
                                                                     
-                                                                    <div className="flex items-center gap-4">
-                                                                        <div className="text-right">
-                                                                            <div className="text-sm text-gray-600">Total: ₹{order.total}</div>
-                                                                            <div className="text-sm text-gray-600">Advance: ₹{order.advance}</div>
-                                                                            <div className="text-lg font-bold text-red-600">Balance: ₹{order.balance}</div>
+                                                                    {/* Amount Details */}
+                                                                    <div className="mb-2 pb-2 border-b border-gray-200 text-xs">
+                                                                        <div className="flex justify-between mb-0.5">
+                                                                            <span className="text-gray-600">Total:</span>
+                                                                            <span className="font-semibold">₹{order.total}</span>
                                                                         </div>
+                                                                        <div className="flex justify-between mb-0.5">
+                                                                            <span className="text-gray-600">Advance:</span>
+                                                                            <span className="font-semibold">₹{order.advance}</span>
+                                                                        </div>
+                                                                        <div className="flex justify-between pt-1 border-t border-gray-300">
+                                                                            <span className="text-red-600 font-bold">Balance:</span>
+                                                                            <span className="font-bold text-red-600">₹{order.balance}</span>
+                                                                        </div>
+                                                                    </div>
+                                                                    
+                                                                    {/* Items */}
+                                                                    <div className="mb-2 pb-2 border-b border-gray-200">
+                                                                        <div className="text-xs font-semibold text-gray-700 mb-1">Items:</div>
+                                                                        {order.items.map((item, idx) => (
+                                                                            <div key={idx} className="text-xs text-gray-600">
+                                                                                {item.shirts && `👔 ${item.shirts}`}
+                                                                                {item.shirts && item.pants && ' • '}
+                                                                                {item.pants && `👖 ${item.pants}`}
+                                                                                {(item.shirts || item.pants) && ` - ₹${item.amount}`}
+                                                                            </div>
+                                                                        ))}
+                                                                    </div>
+                                                                    
+                                                                    {/* Footer */}
+                                                                    <div className="flex items-center justify-between">
+                                                                        <div className="flex items-center gap-2">
+                                                                            <span className={`px-2 py-1 rounded text-xs font-bold ${order.delivered ? 'bg-green-100 text-green-700' : orderIsOverdue ? 'bg-red-100 text-red-700' : 'bg-orange-100 text-orange-700'}`}>
+                                                                                {order.delivered ? '✓' : orderIsOverdue ? '⚠️' : '⏳'}
+                                                                            </span>
+                                                                            
+                                                                            {order.measurementPhoto && (
+                                                                                <img
+                                                                                    src={order.measurementPhoto}
+                                                                                    alt="📸"
+                                                                                    className="w-8 h-8 object-cover rounded border border-blue-400 cursor-pointer hover:opacity-80"
+                                                                                    onClick={() => setViewingPhoto(order.measurementPhoto)}
+                                                                                />
+                                                                            )}
+                                                                        </div>
+                                                                        
                                                                         <label className="toggle-switch">
                                                                             <input 
                                                                                 type="checkbox" 
@@ -473,39 +542,6 @@
                                                                             <span className="slider"></span>
                                                                         </label>
                                                                     </div>
-                                                                </div>
-                                                                
-                                                                {/* Items */}
-                                                                <div className="bg-gray-50 p-3 rounded mt-2">
-                                                                    <div className="text-sm font-semibold text-gray-700 mb-2">Items:</div>
-                                                                    {order.items.map((item, idx) => (
-                                                                        <div key={idx} className="text-sm text-gray-600">
-                                                                            {item.shirts && `Shirts: ${item.shirts}`}
-                                                                            {item.shirts && item.pants && ' | '}
-                                                                            {item.pants && `Pants: ${item.pants}`}
-                                                                            {(item.shirts || item.pants) && ` - ₹${item.amount}`}
-                                                                        </div>
-                                                                    ))}
-                                                                </div>
-
-                                                                <div className="mt-2 flex items-center justify-between gap-2 flex-wrap">
-                                                                    <span className={`px-3 py-1 rounded-full text-sm font-bold ${order.delivered ? 'bg-green-100 text-green-700' : orderIsOverdue ? 'bg-red-100 text-red-700' : 'bg-orange-100 text-orange-700'}`}>
-                                                                        {order.delivered ? '✓ Delivered' : orderIsOverdue ? '⚠️ Overdue' : '⏳ Pending'}
-                                                                    </span>
-                                                                    
-                                                                    {/* Measurement Photo Thumbnail - Moved Here */}
-                                                                    {order.measurementPhoto && (
-                                                                        <div className="flex-shrink-0">
-                                                                            <div className="text-xs text-gray-600 mb-1 text-center">📸 Measurement</div>
-                                                                            <img
-                                                                                src={order.measurementPhoto}
-                                                                                alt="Measurement"
-                                                                                className="w-20 h-20 object-cover rounded-lg border-2 border-blue-400 cursor-pointer hover:opacity-80 shadow-md"
-                                                                                onClick={() => setViewingPhoto(order.measurementPhoto)}
-                                                                                title="Click to view full size"
-                                                                            />
-                                                                        </div>
-                                                                    )}
                                                                 </div>
                                                             </div>
                                                         );
