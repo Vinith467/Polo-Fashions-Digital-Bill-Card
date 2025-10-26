@@ -5,8 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
     <title>Polo Fashions - Digital Bill</title>
-    <link rel="shortcut icon" href="/icon.jpg" type="image/x-icon">
-    
+     <link rel="shortcut icon" href="/icon.jpg" type="image/x-icon">
 
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -705,60 +704,25 @@
                 });
             };
 
-            const downloadAndShare = async () => {
+            const shareBill = async () => {
                 if (!phoneNumber || phoneNumber.length < 10) {
                     alert('10 ಅಂಕಿಯ ಫೋನ್ ಸಂಖ್ಯೆಯನ್ನು ನಮೂದಿಸಿ\nPlease enter customer phone number (10 digits)');
                     return;
                 }
 
-                // Save order first
                 saveOrder();
-
-                // Download the bill
                 await downloadBill();
 
-                // Show instruction
-                setTimeout(() => {
-                    alert('✅ Bill downloaded to your phone!\n\n📱 Now opening WhatsApp...\n\nPlease attach the bill image from your gallery and send!');
-                    
-                    // Open WhatsApp after alert
-                    setTimeout(() => {
-                        let formattedPhone = phoneNumber.replace(/\D/g, '');
-                        if (formattedPhone.length === 10) {
-                            formattedPhone = '91' + formattedPhone;
-                        }
-
-                        const readyDateText = readyDate ? `\nReady By: ${readyDate}` : '';
-                        const message = `Hi ${customerName}! Your bill from Polo Fashions is ready.\n\nCard No: ${cardNumber}\nDate: ${date}${readyDateText}\nTotal: ₹${calculateTotal()}\nAdvance: ₹${advance || 0}\nBalance: ₹${calculateBalance()}\n\n🧾 Your digital Card is generated. Please check the attached image.\n\nThank you for choosing Polo Fashions!`;
-
-                        const whatsappUrl = `https://wa.me/${formattedPhone}?text=${encodeURIComponent(message)}`;
-                        window.location.href = whatsappUrl;
-                    }, 300);
-                }, 1000);
-            };
-
-            const shareBill = () => {
-                if (!phoneNumber || phoneNumber.length < 10) {
-                    alert('10 ಅಂಕಿಯ ಫೋನ್ ಸಂಖ್ಯೆಯನ್ನು ನಮೂದಿಸಿ\nPlease enter customer phone number (10 digits)');
-                    return;
-                }
-
-                // Save order first
-                saveOrder();
-
-                // Format phone number
                 let formattedPhone = phoneNumber.replace(/\D/g, '');
                 if (formattedPhone.length === 10) {
                     formattedPhone = '91' + formattedPhone;
                 }
 
                 const readyDateText = readyDate ? `\nReady By: ${readyDate}` : '';
-                const message = `Hi ${customerName}! Your bill from Polo Fashions is ready.\n\nCard No: ${cardNumber}\nDate: ${date}${readyDateText}\nTotal: ₹${calculateTotal()}\nAdvance: ₹${advance || 0}\nBalance: ₹${calculateBalance()}\n\n🧾 Your digital Card is generated.\n\n💡 TIP: Click the Download button first to get the bill image, then share it here!\n\nThank you for choosing Polo Fashions!`;
+                const message = `Hi ${customerName}! Your bill from Polo Fashions is ready.\n\nCard No: ${cardNumber}\nDate: ${date}${readyDateText}\nTotal: ₹${calculateTotal()}\nAdvance: ₹${advance || 0}\nBalance: ₹${calculateBalance()}\n\n🧾 Your digital Card is generated. Please check it once.\n\nThank you for choosing Polo Fashions!`;
 
                 const whatsappUrl = `https://wa.me/${formattedPhone}?text=${encodeURIComponent(message)}`;
-                
-                // Open WhatsApp immediately
-                window.location.href = whatsappUrl;
+                window.open(whatsappUrl, '_blank');
             };
 
             const shareSMS = () => {
@@ -767,10 +731,8 @@
                     return;
                 }
 
-                // Save order first
                 saveOrder();
 
-                // Format phone number
                 let formattedPhone = phoneNumber.replace(/\D/g, '');
                 if (formattedPhone.length === 10) {
                     formattedPhone = '+91' + formattedPhone;
@@ -780,9 +742,7 @@
                 const message = `Hi ${customerName}! Your bill from Polo Fashions is ready.\n\nCard No: ${cardNumber}\nDate: ${date}${readyDateText}\nTotal: Rs.${calculateTotal()}\nAdvance: Rs.${advance || 0}\nBalance: Rs.${calculateBalance()}\n\nYour digital Card is generated.\n\nPolo Fashions\nMob: 9742445626`;
 
                 const smsUrl = `sms:${formattedPhone}?body=${encodeURIComponent(message)}`;
-                
-                // Open SMS immediately
-                window.location.href = smsUrl;
+                window.open(smsUrl, '_self');
             };
 
             const clearForm = () => {
@@ -1035,25 +995,13 @@
                                 <span>Clear All</span>
                             </button>
                         </div>
-                        
-                        {/* Download & Share Button - RECOMMENDED */}
-                        <button
-                            onClick={downloadAndShare}
-                            className="w-full flex items-center justify-center gap-2 bg-gradient-to-r from-green-600 to-green-700 text-white py-4 px-4 rounded-xl text-base font-bold hover:from-green-700 hover:to-green-800 mb-3 shadow-lg"
-                        >
-                            <Download size={24} />
-                            <span>+</span>
-                            <Share2 size={24} />
-                            <span>Download & WhatsApp</span>
-                        </button>
-
                         <div className="grid grid-cols-2 gap-3">
                             <button
                                 onClick={shareBill}
                                 className="flex flex-col items-center justify-center gap-1 bg-green-600 text-white py-3 px-4 rounded-xl text-sm font-bold hover:bg-green-700"
                             >
                                 <Share2 size={24} />
-                                <span>WhatsApp Only</span>
+                                <span>WhatsApp</span>
                             </button>
                             <button
                                 onClick={shareSMS}
