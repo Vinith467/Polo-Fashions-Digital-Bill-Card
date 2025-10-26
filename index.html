@@ -712,18 +712,7 @@
                 }
 
                 saveOrder();
-
-                // Download the bill first
                 await downloadBill();
-
-                // Wait for download to process
-                await new Promise(resolve => setTimeout(resolve, 1500));
-
-                // Show brief notification
-                alert('📥 Bill downloaded!\n\nOpening WhatsApp... Please attach the bill image from your gallery.');
-
-                // Small delay for user to read the alert
-                await new Promise(resolve => setTimeout(resolve, 500));
 
                 let formattedPhone = phoneNumber.replace(/\D/g, '');
                 if (formattedPhone.length === 10) {
@@ -734,28 +723,16 @@
                 const message = `Hi ${customerName}! Your bill from Polo Fashions is ready.\n\nCard No: ${cardNumber}\nDate: ${date}${readyDateText}\nTotal: ₹${calculateTotal()}\nAdvance: ₹${advance || 0}\nBalance: ₹${calculateBalance()}\n\n🧾 Your digital Card is generated. Please check it once.\n\nThank you for choosing Polo Fashions!`;
 
                 const whatsappUrl = `https://wa.me/${formattedPhone}?text=${encodeURIComponent(message)}`;
-                window.location.href = whatsappUrl;
+                window.open(whatsappUrl, '_blank');
             };
 
-            const shareSMS = async () => {
+            const shareSMS = () => {
                 if (!phoneNumber || phoneNumber.length < 10) {
                     alert('10 ಅಂಕಿಯ ಫೋನ್ ಸಂಖ್ಯೆಯನ್ನು ನಮೂದಿಸಿ\nPlease enter customer phone number (10 digits)');
                     return;
                 }
 
                 saveOrder();
-
-                // Download the bill first
-                await downloadBill();
-
-                // Wait for download to process
-                await new Promise(resolve => setTimeout(resolve, 1500));
-
-                // Show brief notification
-                alert('📥 Bill downloaded!\n\nOpening SMS... Please attach the bill image.');
-
-                // Small delay for user to read the alert
-                await new Promise(resolve => setTimeout(resolve, 500));
 
                 let formattedPhone = phoneNumber.replace(/\D/g, '');
                 if (formattedPhone.length === 10) {
@@ -766,7 +743,7 @@
                 const message = `Hi ${customerName}! Your bill from Polo Fashions is ready.\n\nCard No: ${cardNumber}\nDate: ${date}${readyDateText}\nTotal: Rs.${calculateTotal()}\nAdvance: Rs.${advance || 0}\nBalance: Rs.${calculateBalance()}\n\nYour digital Card is generated.\n\nPolo Fashions\nMob: 9742445626`;
 
                 const smsUrl = `sms:${formattedPhone}?body=${encodeURIComponent(message)}`;
-                window.location.href = smsUrl;
+                window.open(smsUrl, '_self');
             };
 
             const clearForm = () => {
