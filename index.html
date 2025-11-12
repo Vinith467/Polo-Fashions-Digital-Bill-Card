@@ -392,11 +392,46 @@
             const [searchQuery, setSearchQuery] = useState('');
             const [expandedCustomer, setExpandedCustomer] = useState(null);
             const [viewingPhoto, setViewingPhoto] = useState(null);
+            const [filterType, setFilterType] = useState('all'); // 'all', 'pending', 'overdue'
 
-            const filteredCustomers = customers.filter(customer => 
-                customer.phone.includes(searchQuery) || 
-                customer.name.toLowerCase().includes(searchQuery.toLowerCase())
-            );
+            const isOrderOverdue = (order) => {
+                if (!order.readyDate || order.delivered) return false;
+                const today = new Date();
+                today.setHours(0, 0, 0, 0);
+                const readyDate = new Date(order.readyDate);
+                return readyDate < today;
+            };
+
+            const getFilteredCustomers = () => {
+                let filtered = customers.filter(customer => 
+                    customer.phone.includes(searchQuery) || 
+                    customer.name.toLowerCase().includes(searchQuery.toLowerCase())
+                );
+
+                // Apply filter based on order status
+                if (filterType === 'pending') {
+                    filtered = filtered.filter(customer => {
+                        const customerOrders = orders.filter(o => o.customerId === customer.id);
+                        return customerOrders.some(o => !o.delivered);
+                    });
+                } else if (filterType === 'overdue') {
+                    filtered = filtered.filter(customer => {
+                        const customerOrders = orders.filter(o => o.customerId === customer.id);
+                        return customerOrders.some(o => isOrderOverdue(o));
+                    });
+                }
+
+                // Sort by highest card number first
+                return filtered.sort((a, b) => {
+                    const aOrders = orders.filter(o => o.customerId === a.id);
+                    const bOrders = orders.filter(o => o.customerId === b.id);
+                    const aMaxCard = Math.max(...aOrders.map(o => parseInt(o.cardNumber) || 0), 0);
+                    const bMaxCard = Math.max(...bOrders.map(o => parseInt(o.cardNumber) || 0), 0);
+                    return bMaxCard - aMaxCard;
+                });
+            };
+
+            const filteredCustomers = getFilteredCustomers();
 
             const getCustomerOrders = (customerId) => {
                 return orders.filter(o => o.customerId === customerId).sort((a, b) => 
@@ -455,14 +490,11 @@
             const getOverdueCount = () => {
                 const today = new Date();
                 today.setHours(0, 0, 0, 0);
-                return orders.filter(o => !o.delivered && o.readyDate && new Date(o.readyDate) < today).length;
-            };
-
-            const isOrderOverdue = (order) => {
-                if (!order.readyDate || order.delivered) return false;
-                const today = new Date();
-                today.setHours(0, 0, 0, 0);
-                return new Date(order.readyDate) < today;
+                return orders.filter(o => {
+                    if (!o.readyDate || o.delivered) return false;
+                    const readyDate = new Date(o.readyDate);
+                    return readyDate < today;
+                }).length;
             };
 
             return (
@@ -506,19 +538,39 @@
                         </div>
 
                         <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6">
-                            <div className="bg-purple-50 p-4 rounded-lg border-2 border-purple-300">
+                            <div 
+                                className="bg-purple-50 p-4 rounded-lg border-2 border-purple-300 cursor-default"
+                            >
                                 <div className="text-sm text-purple-700 font-semibold">Total Customers</div>
                                 <div className="text-3xl font-bold text-purple-900">{customers.length}</div>
                             </div>
-                            <div className="bg-orange-50 p-4 rounded-lg border-2 border-orange-300">
+                            <div 
+                                onClick={() => setFilterType(filterType === 'pending' ? 'all' : 'pending')}
+                                className={`p-4 rounded-lg border-2 cursor-pointer transition-all ${
+                                    filterType === 'pending' 
+                                        ? 'bg-orange-200 border-orange-500 shadow-lg' 
+                                        : 'bg-orange-50 border-orange-300 hover:bg-orange-100'
+                                }`}
+                            >
                                 <div className="text-sm text-orange-700 font-semibold">Pending Orders</div>
                                 <div className="text-3xl font-bold text-orange-900">{getPendingCount()}</div>
+                                {filterType === 'pending' && <div className="text-xs text-orange-600 mt-1">✓ Active Filter</div>}
                             </div>
-                            <div className="bg-red-50 p-4 rounded-lg border-2 border-red-300">
+                            <div 
+                                onClick={() => setFilterType(filterType === 'overdue' ? 'all' : 'overdue')}
+                                className={`p-4 rounded-lg border-2 cursor-pointer transition-all ${
+                                    filterType === 'overdue' 
+                                        ? 'bg-red-200 border-red-500 shadow-lg' 
+                                        : 'bg-red-50 border-red-300 hover:bg-red-100'
+                                }`}
+                            >
                                 <div className="text-sm text-red-700 font-semibold">⚠️ Overdue</div>
                                 <div className="text-3xl font-bold text-red-900">{getOverdueCount()}</div>
+                                {filterType === 'overdue' && <div className="text-xs text-red-600 mt-1">✓ Active Filter</div>}
                             </div>
-                            <div className="bg-green-50 p-4 rounded-lg border-2 border-green-300">
+                            <div 
+                                className="bg-green-50 p-4 rounded-lg border-2 border-green-300 cursor-default"
+                            >
                                 <div className="text-sm text-green-700 font-semibold">Total Balance</div>
                                 <div className="text-3xl font-bold text-green-900">₹{getTotalPending()}</div>
                             </div>
@@ -539,144 +591,162 @@
                     <div className="space-y-4">
                         {filteredCustomers.length === 0 ? (
                             <div className="bg-white rounded-xl p-8 text-center text-gray-500">
-                                {searchQuery ? 'No customers found matching your search.' : 'No customers yet. Create your first bill!'}
+                                {searchQuery ? 'No customers found matching your search.' : 
+                                 filterType === 'pending' ? 'No pending orders found.' :
+                                 filterType === 'overdue' ? 'No overdue orders found.' :
+                                 'No customers yet. Create your first bill!'}
                             </div>
                         ) : (
-                            filteredCustomers.map(customer => {
-                                const customerOrders = getCustomerOrders(customer.id);
-                                const isExpanded = expandedCustomer === customer.id;
-                                const pendingOrders = customerOrders.filter(o => !o.delivered);
-                                const overdueOrders = customerOrders.filter(o => isOrderOverdue(o));
-                                const totalBalance = pendingOrders.reduce((sum, o) => sum + o.balance, 0);
-
-                                return (
-                                    <div key={customer.id} className="bg-white rounded-xl shadow-lg overflow-hidden border-2 border-purple-200">
-                                        <div 
-                                            className="p-6 cursor-pointer hover:bg-purple-50 transition-colors"
-                                            onClick={() => setExpandedCustomer(isExpanded ? null : customer.id)}
+                            <>
+                                {filterType !== 'all' && (
+                                    <div className="bg-blue-100 border-2 border-blue-400 rounded-lg p-3 flex items-center justify-between">
+                                        <span className="text-blue-900 font-semibold">
+                                            Showing {filterType === 'pending' ? 'Pending' : 'Overdue'} Orders Only
+                                        </span>
+                                        <button
+                                            onClick={() => setFilterType('all')}
+                                            className="bg-blue-600 text-white px-4 py-1 rounded-lg text-sm font-bold hover:bg-blue-700"
                                         >
-                                            <div className="flex justify-between items-start">
-                                                <div className="flex-1">
-                                                    <div className="flex items-center gap-3 mb-2 flex-wrap">
-                                                        <div className="text-2xl font-bold text-purple-900">{customer.name}</div>
-                                                        {pendingOrders.length > 0 && (
-                                                            <span className="bg-orange-500 text-white px-3 py-1 rounded-full text-sm font-bold">
-                                                                {pendingOrders.length} Pending
-                                                            </span>
-                                                        )}
-                                                        {overdueOrders.length > 0 && (
-                                                            <span className="bg-red-600 text-white px-3 py-1 rounded-full text-sm font-bold animate-pulse">
-                                                                ⚠️ {overdueOrders.length} Overdue
-                                                            </span>
-                                                        )}
+                                            Clear Filter
+                                        </button>
+                                    </div>
+                                )}
+                                {filteredCustomers.map(customer => {
+                                    const customerOrders = getCustomerOrders(customer.id);
+                                    const isExpanded = expandedCustomer === customer.id;
+                                    const pendingOrders = customerOrders.filter(o => !o.delivered);
+                                    const overdueOrders = customerOrders.filter(o => isOrderOverdue(o));
+                                    const totalBalance = pendingOrders.reduce((sum, o) => sum + o.balance, 0);
+
+                                    return (
+                                        <div key={customer.id} className="bg-white rounded-xl shadow-lg overflow-hidden border-2 border-purple-200">
+                                            <div 
+                                                className="p-6 cursor-pointer hover:bg-purple-50 transition-colors"
+                                                onClick={() => setExpandedCustomer(isExpanded ? null : customer.id)}
+                                            >
+                                                <div className="flex justify-between items-start">
+                                                    <div className="flex-1">
+                                                        <div className="flex items-center gap-3 mb-2 flex-wrap">
+                                                            <div className="text-2xl font-bold text-purple-900">{customer.name}</div>
+                                                            {pendingOrders.length > 0 && (
+                                                                <span className="bg-orange-500 text-white px-3 py-1 rounded-full text-sm font-bold">
+                                                                    {pendingOrders.length} Pending
+                                                                </span>
+                                                            )}
+                                                            {overdueOrders.length > 0 && (
+                                                                <span className="bg-red-600 text-white px-3 py-1 rounded-full text-sm font-bold animate-pulse">
+                                                                    ⚠️ {overdueOrders.length} Overdue
+                                                                </span>
+                                                            )}
+                                                        </div>
+                                                        <div className="text-lg text-gray-600 mb-2">📞 {customer.phone}</div>
+                                                        <div className="flex gap-4 text-sm flex-wrap">
+                                                            <span className="text-gray-600">Total Orders: <span className="font-bold text-gray-900">{customerOrders.length}</span></span>
+                                                            {totalBalance > 0 && (
+                                                                <span className="text-red-600">Balance Due: <span className="font-bold">₹{totalBalance}</span></span>
+                                                            )}
+                                                        </div>
                                                     </div>
-                                                    <div className="text-lg text-gray-600 mb-2">📞 {customer.phone}</div>
-                                                    <div className="flex gap-4 text-sm flex-wrap">
-                                                        <span className="text-gray-600">Total Orders: <span className="font-bold text-gray-900">{customerOrders.length}</span></span>
-                                                        {totalBalance > 0 && (
-                                                            <span className="text-red-600">Balance Due: <span className="font-bold">₹{totalBalance}</span></span>
-                                                        )}
+                                                    <div className="flex items-center gap-2">
+                                                        {isExpanded ? <ChevronUp size={24} /> : <ChevronDown size={24} />}
                                                     </div>
-                                                </div>
-                                                <div className="flex items-center gap-2">
-                                                    {isExpanded ? <ChevronUp size={24} /> : <ChevronDown size={24} />}
                                                 </div>
                                             </div>
-                                        </div>
 
-                                        {isExpanded && customerOrders.length > 0 && (
-                                            <div className="border-t-2 border-purple-200 bg-purple-50 p-6">
-                                                <h3 className="text-xl font-bold text-purple-900 mb-4">Order History</h3>
-                                                <div className="space-y-3">
-                                                    {customerOrders.map(order => {
-                                                        const orderIsOverdue = isOrderOverdue(order);
-                                                        return (
-                                                            <div key={order.id} className={`bg-white rounded-lg border-2 overflow-hidden ${orderIsOverdue ? 'border-red-500' : order.delivered ? 'border-green-300' : 'border-orange-300'}`}>
-                                                                <div className="bg-blue-600 text-white px-3 py-2">
-                                                                    <span className="text-lg font-bold">Card #{order.cardNumber}</span>
-                                                                </div>
-                                                                
-                                                                <div className="p-3">
-                                                                    <div className="flex items-start justify-between mb-2 pb-2 border-b border-gray-200">
-                                                                        <div className="flex-1 text-xs">
-                                                                            <div className="text-gray-600">📅 {order.date}</div>
-                                                                            {order.readyDate && (
-                                                                                <div className={`font-semibold ${orderIsOverdue ? 'text-red-600' : 'text-gray-600'}`}>
-                                                                                    ⏰ {order.readyDate} {orderIsOverdue && '⚠️'}
-                                                                                </div>
-                                                                            )}
-                                                                        </div>
-                                                                        <button
-                                                                            onClick={() => deleteOrder(order.id, order.customerId)}
-                                                                            className="bg-red-500 hover:bg-red-600 text-white p-1.5 rounded ml-2"
-                                                                            title="Delete"
-                                                                        >
-                                                                            <Trash2 size={14} />
-                                                                        </button>
+                                            {isExpanded && customerOrders.length > 0 && (
+                                                <div className="border-t-2 border-purple-200 bg-purple-50 p-6">
+                                                    <h3 className="text-xl font-bold text-purple-900 mb-4">Order History</h3>
+                                                    <div className="space-y-3">
+                                                        {customerOrders.map(order => {
+                                                            const orderIsOverdue = isOrderOverdue(order);
+                                                            return (
+                                                                <div key={order.id} className={`bg-white rounded-lg border-2 overflow-hidden ${orderIsOverdue ? 'border-red-500' : order.delivered ? 'border-green-300' : 'border-orange-300'}`}>
+                                                                    <div className="bg-blue-600 text-white px-3 py-2">
+                                                                        <span className="text-lg font-bold">Card #{order.cardNumber}</span>
                                                                     </div>
                                                                     
-                                                                    <div className="mb-2 pb-2 border-b border-gray-200 text-xs">
-                                                                        <div className="flex justify-between mb-0.5">
-                                                                            <span className="text-gray-600">Total:</span>
-                                                                            <span className="font-semibold">₹{order.total}</span>
-                                                                        </div>
-                                                                        <div className="flex justify-between mb-0.5">
-                                                                            <span className="text-gray-600">Advance:</span>
-                                                                            <span className="font-semibold">₹{order.advance}</span>
-                                                                        </div>
-                                                                        <div className="flex justify-between pt-1 border-t border-gray-300">
-                                                                            <span className="text-red-600 font-bold">Balance:</span>
-                                                                            <span className="font-bold text-red-600">₹{order.balance}</span>
-                                                                        </div>
-                                                                    </div>
-                                                                    
-                                                                    <div className="mb-2 pb-2 border-b border-gray-200">
-                                                                        <div className="text-xs font-semibold text-gray-700 mb-1">Items:</div>
-                                                                        {order.items.map((item, idx) => (
-                                                                            <div key={idx} className="text-xs text-gray-600">
-                                                                                {item.shirts && `👔 ${item.shirts}`}
-                                                                                {item.shirts && item.pants && ' • '}
-                                                                                {item.pants && `👖 ${item.pants}`}
-                                                                                {(item.shirts || item.pants) && ` - ₹${item.amount}`}
+                                                                    <div className="p-3">
+                                                                        <div className="flex items-start justify-between mb-2 pb-2 border-b border-gray-200">
+                                                                            <div className="flex-1 text-xs">
+                                                                                <div className="text-gray-600">📅 {order.date}</div>
+                                                                                {order.readyDate && (
+                                                                                    <div className={`font-semibold ${orderIsOverdue ? 'text-red-600' : 'text-gray-600'}`}>
+                                                                                        ⏰ {order.readyDate} {orderIsOverdue && '⚠️'}
+                                                                                    </div>
+                                                                                )}
                                                                             </div>
-                                                                        ))}
-                                                                    </div>
-                                                                    
-                                                                    <div className="flex items-center justify-between">
-                                                                        <div className="flex items-center gap-2">
-                                                                            <span className={`px-2 py-1 rounded text-xs font-bold ${order.delivered ? 'bg-green-100 text-green-700' : orderIsOverdue ? 'bg-red-100 text-red-700' : 'bg-orange-100 text-orange-700'}`}>
-                                                                                {order.delivered ? '✓' : orderIsOverdue ? '⚠️' : '⏳'}
-                                                                            </span>
-                                                                            
-                                                                            {order.measurementPhoto && (
-                                                                                <img
-                                                                                    src={order.measurementPhoto}
-                                                                                    alt="📸"
-                                                                                    className="w-8 h-8 object-cover rounded border border-blue-400 cursor-pointer hover:opacity-80"
-                                                                                    onClick={() => setViewingPhoto(order.measurementPhoto)}
-                                                                                />
-                                                                            )}
+                                                                            <button
+                                                                                onClick={() => deleteOrder(order.id, order.customerId)}
+                                                                                className="bg-red-500 hover:bg-red-600 text-white p-1.5 rounded ml-2"
+                                                                                title="Delete"
+                                                                            >
+                                                                                <Trash2 size={14} />
+                                                                            </button>
                                                                         </div>
                                                                         
-                                                                        <label className="toggle-switch">
-                                                                            <input 
-                                                                                type="checkbox" 
-                                                                                checked={order.delivered || false}
-                                                                                onChange={() => toggleOrderStatus(order.id)}
-                                                                            />
-                                                                            <span className="slider"></span>
-                                                                        </label>
+                                                                        <div className="mb-2 pb-2 border-b border-gray-200 text-xs">
+                                                                            <div className="flex justify-between mb-0.5">
+                                                                                <span className="text-gray-600">Total:</span>
+                                                                                <span className="font-semibold">₹{order.total}</span>
+                                                                            </div>
+                                                                            <div className="flex justify-between mb-0.5">
+                                                                                <span className="text-gray-600">Advance:</span>
+                                                                                <span className="font-semibold">₹{order.advance}</span>
+                                                                            </div>
+                                                                            <div className="flex justify-between pt-1 border-t border-gray-300">
+                                                                                <span className="text-red-600 font-bold">Balance:</span>
+                                                                                <span className="font-bold text-red-600">₹{order.balance}</span>
+                                                                            </div>
+                                                                        </div>
+                                                                        
+                                                                        <div className="mb-2 pb-2 border-b border-gray-200">
+                                                                            <div className="text-xs font-semibold text-gray-700 mb-1">Items:</div>
+                                                                            {order.items.map((item, idx) => (
+                                                                                <div key={idx} className="text-xs text-gray-600">
+                                                                                    {item.shirts && `👔 ${item.shirts}`}
+                                                                                    {item.shirts && item.pants && ' • '}
+                                                                                    {item.pants && `👖 ${item.pants}`}
+                                                                                    {(item.shirts || item.pants) && ` - ₹${item.amount}`}
+                                                                                </div>
+                                                                            ))}
+                                                                        </div>
+                                                                        
+                                                                        <div className="flex items-center justify-between">
+                                                                            <div className="flex items-center gap-2">
+                                                                                <span className={`px-2 py-1 rounded text-xs font-bold ${order.delivered ? 'bg-green-100 text-green-700' : orderIsOverdue ? 'bg-red-100 text-red-700' : 'bg-orange-100 text-orange-700'}`}>
+                                                                                    {order.delivered ? '✓' : orderIsOverdue ? '⚠️' : '⏳'}
+                                                                                </span>
+                                                                                
+                                                                                {order.measurementPhoto && (
+                                                                                    <img
+                                                                                        src={order.measurementPhoto}
+                                                                                        alt="📸"
+                                                                                        className="w-8 h-8 object-cover rounded border border-blue-400 cursor-pointer hover:opacity-80"
+                                                                                        onClick={() => setViewingPhoto(order.measurementPhoto)}
+                                                                                    />
+                                                                                )}
+                                                                            </div>
+                                                                            
+                                                                            <label className="toggle-switch">
+                                                                                <input 
+                                                                                    type="checkbox" 
+                                                                                    checked={order.delivered || false}
+                                                                                    onChange={() => toggleOrderStatus(order.id)}
+                                                                                />
+                                                                                <span className="slider"></span>
+                                                                            </label>
+                                                                        </div>
                                                                     </div>
                                                                 </div>
-                                                            </div>
-                                                        );
-                                                    })}
+                                                            );
+                                                        })}
+                                                    </div>
                                                 </div>
-                                            </div>
-                                        )}
-                                    </div>
-                                );
-                            })
+                                            )}
+                                        </div>
+                                    );
+                                })}
+                            </>
                         )}
                     </div>
                 </div>
