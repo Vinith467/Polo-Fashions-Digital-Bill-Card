@@ -4,22 +4,17 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
-    <title>Polo Fashions - Digital Bill</title>
-    <link rel="icon" type="image/svg+xml" href="/icon.jpg" />
-    <!-- Tailwind CSS -->
+    <title>Polo Fashions - Digital Bill & Staff</title>
+   <link rel="shortcut icon" href="/icon.jpg" type="image/x-icon">
     <script src="https://cdn.tailwindcss.com"></script>
 
-    <!-- React and ReactDOM -->
     <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
     <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
 
-    <!-- Babel for JSX -->
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
 
-    <!-- HTML2Canvas for image generation -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 
-    <!-- Firebase -->
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
 
@@ -175,7 +170,7 @@
             from { opacity: 0; transform: scale(0.8); }
             to { opacity: 1; transform: scale(1); }
         }
-        
+
         /* Responsive Typography */
         @media (max-width: 640px) {
             .card {
@@ -230,15 +225,12 @@
             appId: "1:952281661533:web:c685b9a2c3e350bc5f0db4",
             measurementId: "G-0Y2FPT4G7G"
         };
-
         // Cloudinary Configuration
         const CLOUDINARY_CLOUD_NAME = 'drzhtsyj8';
         const CLOUDINARY_UPLOAD_PRESET = 'polo_measurements';
-
         // Initialize Firebase
         firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
-
         // Cloudinary Upload Function
         async function uploadToCloudinary(file) {
             const formData = new FormData();
@@ -253,7 +245,6 @@
                     body: formData
                 }
             );
-
             if (!response.ok) {
                 throw new Error('Failed to upload image to Cloudinary');
             }
@@ -283,7 +274,6 @@
                         canvas.height = height;
                         const ctx = canvas.getContext('2d');
                         ctx.drawImage(img, 0, 0, width, height);
-
                         canvas.toBlob((blob) => {
                             resolve(blob);
                         }, 'image/jpeg', quality);
@@ -296,93 +286,130 @@
     </script>
 
     <script type="text/babel">
-        const { useState, useRef, useEffect } = React;
+        const { useState, useRef, useEffect, useCallback } = React;
+        
+        // --- Staff Configuration Constants ---
+        const workTypesConfig = {
+            pant_maker: {
+                label: "Pant Maker",
+                fields: ["pant"],
+                rateKeys: ["pantMakerCost"],
+            },
+            shirt_maker: {
+                label: "Shirt Maker",
+                fields: ["shirt"],
+                rateKeys: ["shirtMakerCost"],
+            },
+            cutting_master: {
+                label: "Cutting Master",
+                fields: ["shirt", "pant"],
+                rateKeys: ["shirtPieceCuttingCost", "pantPieceCuttingCost"],
+            },
+            iron_master: {
+                label: "Iron Master",
+                fields: ["shirt", "pant"],
+                rateKeys: ["shirtIronCost", "pantIronCost"],
+            },
+            helper: { label: "Helper", fields: [], rateKeys: [] }, 
+        };
 
-        // Icon components
+        const rateKeysConfig = {
+            shirtMakerCost: { label: "Shirt Stitching Cost", default: 50 },
+            pantMakerCost: { label: "Pant Stitching Cost", default: 60 },
+            shirtIronCost: { label: "Shirt Ironing Cost", default: 5 },
+            pantIronCost: { label: "Pant Ironing Cost", default: 8 },
+            shirtPieceCuttingCost: { label: "Shirt Cutting Cost", default: 10 },
+            pantPieceCuttingCost: { label: "Pant Cutting Cost", default: 15 },
+        };
+
+        const initialRates = Object.fromEntries(
+            Object.entries(rateKeysConfig).map(([key, value]) => [key, value.default])
+        );
+
+        // --- Icon components ---
         const Download = ({ size = 24 }) => (
             <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                 <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3" />
             </svg>
         );
-
         const Share2 = ({ size = 24 }) => (
             <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                 <circle cx="18" cy="5" r="3" /><circle cx="6" cy="12" r="3" /><circle cx="18" cy="19" r="3" />
                 <line x1="8.59" y1="13.51" x2="15.42" y2="17.49" /><line x1="15.41" y1="6.51" x2="8.59" y2="10.49" />
             </svg>
         );
-
         const MessageSquare = ({ size = 24 }) => (
             <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                 <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
             </svg>
         );
-
-        const Plus = ({ size = 24 }) => (
-            <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+        const Plus = ({ size = 24, className }) => (
+            <svg className={className} width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                 <line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" />
             </svg>
         );
-
-        const Trash2 = ({ size = 24 }) => (
-            <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+        const Trash2 = ({ size = 24, className }) => (
+            <svg className={className} width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                 <polyline points="3 6 5 6 21 6" /><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
                 <line x1="10" y1="11" x2="10" y2="17" /><line x1="14" y1="11" x2="14" y2="17" />
             </svg>
         );
-
-        const Users = ({ size = 24 }) => (
-            <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+        const Users = ({ size = 24, className }) => (
+            <svg className={className} width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                 <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
                 <circle cx="9" cy="7" r="4" />
                 <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
                 <path d="M16 3.13a4 4 0 0 1 0 7.75" />
             </svg>
         );
-
         const Clock = ({ size = 24 }) => (
             <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                 <circle cx="12" cy="12" r="10" />
                 <polyline points="12 6 12 12 16 14" />
             </svg>
         );
-
-        const Home = ({ size = 24 }) => (
-            <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+        const Home = ({ size = 24, className }) => (
+            <svg className={className} width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                 <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
                 <polyline points="9 22 9 12 15 12 15 22" />
             </svg>
         );
-
-        const Search = ({ size = 24 }) => (
-            <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+        const Search = ({ size = 24, className }) => (
+            <svg className={className} width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                 <circle cx="11" cy="11" r="8" />
                 <path d="m21 21-4.35-4.35" />
             </svg>
         );
-
         const ChevronDown = ({ size = 24 }) => (
             <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                 <polyline points="6 9 12 15 18 9" />
             </svg>
         );
-
         const ChevronUp = ({ size = 24 }) => (
             <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                 <polyline points="18 15 12 9 6 15" />
             </svg>
         );
-
         const Cloud = ({ size = 24 }) => (
             <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                 <path d="M18 10h-1.26A8 8 0 1 0 9 20h9a5 5 0 0 0 0-10z" />
             </svg>
         );
-
         const ArrowUp = ({ size = 24 }) => (
             <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                 <line x1="12" y1="19" x2="12" y2="5" />
                 <polyline points="5 12 12 5 19 12" />
+            </svg>
+        );
+        const Edit2 = ({ size = 24, className }) => (
+            <svg className={className} width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z" />
+            </svg>
+        );
+        const DollarSign = ({ size = 24, className }) => (
+            <svg className={className} width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <line x1="12" y1="1" x2="12" y2="23" />
+                <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
             </svg>
         );
 
@@ -398,12 +425,495 @@
             );
         }
 
+        // --- Staff Management Component ---
+        function StaffManagement({ onBack }) {
+            const [staffMembers, setStaffMembers] = useState([]);
+            const [workRecords, setWorkRecords] = useState([]);
+            const [loading, setLoading] = useState(true);
+            const [globalRates, setGlobalRates] = useState(initialRates);
+            const [tempRates, setTempRates] = useState(initialRates);
+            const [showAddStaff, setShowAddStaff] = useState(false);
+            const [showRateSetter, setShowRateSetter] = useState(false);
+            const [showPaymentModal, setShowPaymentModal] = useState(false);
+            const [selectedPayment, setSelectedPayment] = useState({ recordId: "", staffId: "", amount: "" });
+            const [currentWorkType, setCurrentWorkType] = useState("pant_maker");
+            const [newStaff, setNewStaff] = useState({ name: "", workType: "pant_maker" });
+
+            const filteredStaff = staffMembers.filter((s) => s.workType === currentWorkType);
+            const workTypesList = Object.keys(workTypesConfig);
+
+            const getStaffRates = useCallback((staff) => {
+                const config = workTypesConfig[staff.workType];
+                const rates = {};
+                if (config) {
+                    config.rateKeys.forEach((key) => {
+                        rates[key] = globalRates[key] || 0;
+                    });
+                }
+                return {
+                    shirtRate: rates.shirtMakerCost || rates.shirtIronCost || rates.shirtPieceCuttingCost || 0,
+                    pantRate: rates.pantMakerCost || rates.pantIronCost || rates.pantPieceCuttingCost || 0,
+                };
+            }, [globalRates]);
+
+            const ensureTodayRecord = useCallback(async (staff, currentWorkRecords) => {
+                const today = new Date().toISOString().split("T")[0];
+                let todayRecord = currentWorkRecords.find((r) => r.date === today);
+
+                if (!todayRecord && staff.length > 0) {
+                    const snapshot = await db.collection("workRecords").where("date", "==", today).get();
+                    if (!snapshot.empty) {
+                        todayRecord = { id: snapshot.docs[0].id, ...snapshot.docs[0].data() };
+                    }
+                }
+
+                if (!todayRecord && staff.length > 0) {
+                    const recordRef = db.collection("workRecords").doc();
+                    const newRecord = {
+                        id: recordRef.id,
+                        date: today,
+                        day: new Date().toLocaleDateString("en-US", { weekday: "long" }),
+                        work: {},
+                    };
+                    staff.forEach((s) => {
+                        newRecord.work[s.id] = { shirt: 0, pant: 0, earned: 0, paid: 0, balance: 0 };
+                    });
+                    await recordRef.set(newRecord);
+                    setWorkRecords((prev) => [newRecord, ...prev]);
+                }
+            }, []);
+
+            const loadData = useCallback(async () => {
+                try {
+                    setLoading(true);
+                    const ratesDoc = await db.collection("config").doc("globalRates").get();
+                    const loadedRates = ratesDoc.exists ? ratesDoc.data() : initialRates;
+                    setGlobalRates(loadedRates);
+                    setTempRates(loadedRates);
+
+                    const staffSnapshot = await db.collection("staff").get();
+                    const staffData = staffSnapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+                    setStaffMembers(staffData);
+
+                    const recordsSnapshot = await db.collection("workRecords").orderBy("date", "desc").get();
+                    const recordsData = recordsSnapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+                    setWorkRecords(recordsData);
+
+                    await ensureTodayRecord(staffData, recordsData);
+                    setLoading(false);
+                } catch (error) {
+                    console.error("Error loading staff data:", error);
+                    setLoading(false);
+                    alert("Failed to load data");
+                }
+            }, [ensureTodayRecord]);
+
+            useEffect(() => { loadData(); }, [loadData]);
+
+            const updateGlobalRates = async () => {
+                try {
+                    setLoading(true);
+                    const ratesToSave = Object.fromEntries(
+                        Object.entries(tempRates).map(([key, value]) => [key, parseFloat(value) || 0])
+                    );
+                    await db.collection("config").doc("globalRates").set(ratesToSave, { merge: true });
+                    setGlobalRates(ratesToSave);
+                    setShowRateSetter(false);
+                    setLoading(false);
+                } catch (error) {
+                    console.error("Error updating rates:", error);
+                    alert("Failed to update global rates");
+                    setLoading(false);
+                }
+            };
+
+            const addStaff = async () => {
+                if (!newStaff.name.trim()) { alert("Please enter staff name"); return; }
+                try {
+                    setLoading(true);
+                    const staffRef = db.collection("staff").doc();
+                    const staffData = {
+                        id: staffRef.id,
+                        name: newStaff.name,
+                        workType: newStaff.workType,
+                        createdAt: new Date().toISOString(),
+                    };
+                    await staffRef.set(staffData);
+
+                    // Update existing records with new staff entry
+                    for (const record of workRecords) {
+                        await db.collection("workRecords").doc(record.id).update({
+                            [`work.${staffRef.id}`]: { shirt: 0, pant: 0, earned: 0, paid: 0, balance: 0 },
+                        });
+                    }
+
+                    setNewStaff({ name: "", workType: "pant_maker" });
+                    setShowAddStaff(false);
+                    await loadData();
+                } catch (error) {
+                    console.error("Error adding staff:", error);
+                    alert("Failed to add staff member");
+                }
+            };
+
+            const deleteStaff = async (staffId) => {
+                if (!window.confirm("Are you sure you want to delete this staff member?")) return;
+                try {
+                    setLoading(true);
+                    await db.collection("staff").doc(staffId).delete();
+                    // Note: We are not removing them from historical records to preserve data integrity
+                    await loadData();
+                } catch (error) {
+                    console.error("Error deleting staff:", error);
+                    alert("Failed to delete staff member");
+                }
+            };
+
+            const updateWork = async (recordId, staffId, field, value) => {
+                try {
+                    const staff = staffMembers.find((s) => s.id === staffId);
+                    const record = workRecords.find((r) => r.id === recordId);
+                    const work = record.work[staffId] || { shirt: 0, pant: 0, earned: 0, paid: 0, balance: 0 };
+                    
+                    const updatedWork = { ...work, [field]: parseInt(value) || 0 };
+
+                    if (staff.workType !== "helper") {
+                        const staffRates = getStaffRates(staff);
+                        updatedWork.earned = (updatedWork.shirt || 0) * staffRates.shirtRate + (updatedWork.pant || 0) * staffRates.pantRate;
+                    }
+                    updatedWork.balance = updatedWork.earned - (updatedWork.paid || 0);
+
+                    await db.collection("workRecords").doc(recordId).update({
+                        [`work.${staffId}`]: updatedWork,
+                    });
+
+                    setWorkRecords(workRecords.map((r) => r.id === recordId ? { ...r, work: { ...r.work, [staffId]: updatedWork } } : r));
+                } catch (error) {
+                    console.error("Error updating work:", error);
+                    alert("Failed to update work count");
+                }
+            };
+
+            const openPaymentModal = (recordId, staffId, currentPaid) => {
+                setSelectedPayment({ recordId, staffId, amount: currentPaid || "" });
+                setShowPaymentModal(true);
+            };
+
+            const savePayment = async () => {
+                try {
+                    const { recordId, staffId, amount } = selectedPayment;
+                    const record = workRecords.find((r) => r.id === recordId);
+                    const work = record.work[staffId];
+                    const paidAmount = parseFloat(amount) || 0;
+                    const updatedWork = { ...work, paid: paidAmount, balance: (work.earned || 0) - paidAmount };
+
+                    await db.collection("workRecords").doc(recordId).update({ [`work.${staffId}`]: updatedWork });
+                    setWorkRecords(workRecords.map((r) => r.id === recordId ? { ...r, work: { ...r.work, [staffId]: updatedWork } } : r));
+                    setShowPaymentModal(false);
+                    setSelectedPayment({ recordId: "", staffId: "", amount: "" });
+                } catch (error) {
+                    console.error("Error saving payment:", error);
+                    alert("Failed to save payment");
+                }
+            };
+
+            const calculateWeeklyStats = (staffId) => {
+                const weekRecords = workRecords.slice(0, 7);
+                return weekRecords.reduce((stats, record) => {
+                    const work = record.work[staffId] || { earned: 0, paid: 0, balance: 0 };
+                    return {
+                        earned: stats.earned + (work.earned || 0),
+                        paid: stats.paid + (work.paid || 0),
+                        balance: stats.balance + (work.balance || 0),
+                    };
+                }, { earned: 0, paid: 0, balance: 0 });
+            };
+
+            return (
+                <div className="database-container">
+                    {loading && <LoadingOverlay message="Loading staff data..." />}
+                    
+                    <div className="bg-white rounded-2xl shadow-xl p-4 sm:p-6 mb-6">
+                        {/* Mobile Optimized Header */}
+                        <div className="flex flex-col md:flex-row justify-between items-center mb-6 gap-4">
+                            <h1 className="text-2xl sm:text-3xl font-bold text-indigo-900 flex items-center gap-2">
+                                👷 Staff Management
+                            </h1>
+                            <div className="flex gap-2 flex-wrap justify-center">
+                                <button onClick={() => { setTempRates(globalRates); setShowRateSetter(true); }} className="flex items-center gap-2 bg-yellow-500 text-white px-3 py-2 rounded-xl text-sm font-bold hover:bg-yellow-600 shadow-md">
+                                    <DollarSign size={18} /> Rates
+                                </button>
+                                <button onClick={() => setShowAddStaff(true)} className="flex items-center gap-2 bg-green-600 text-white px-3 py-2 rounded-xl text-sm font-bold hover:bg-green-700 shadow-md">
+                                    <Plus size={18} /> Add Staff
+                                </button>
+                                <button onClick={onBack} className="flex items-center gap-2 bg-blue-600 text-white px-3 py-2 rounded-xl text-sm font-bold hover:bg-blue-700 shadow-md">
+                                    <Home size={18} /> Home
+                                </button>
+                            </div>
+                        </div>
+
+                        {/* Stats Dashboard */}
+                        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
+                             <div className="bg-indigo-50 p-3 rounded-lg border-2 border-indigo-200">
+                                <div className="text-xs sm:text-sm text-indigo-700 font-semibold">Total Staff</div>
+                                <div className="text-xl sm:text-2xl font-bold text-indigo-900">{staffMembers.length}</div>
+                            </div>
+                            <div className="bg-green-50 p-3 rounded-lg border-2 border-green-200">
+                                <div className="text-xs sm:text-sm text-green-700 font-semibold">Week Earned</div>
+                                <div className="text-xl sm:text-2xl font-bold text-green-900">₹{filteredStaff.reduce((sum, s) => sum + calculateWeeklyStats(s.id).earned, 0)}</div>
+                            </div>
+                            <div className="bg-blue-50 p-3 rounded-lg border-2 border-blue-200">
+                                <div className="text-xs sm:text-sm text-blue-700 font-semibold">Week Paid</div>
+                                <div className="text-xl sm:text-2xl font-bold text-blue-900">₹{filteredStaff.reduce((sum, s) => sum + calculateWeeklyStats(s.id).paid, 0)}</div>
+                            </div>
+                            <div className="bg-red-50 p-3 rounded-lg border-2 border-red-200">
+                                <div className="text-xs sm:text-sm text-red-700 font-semibold">Balance Due</div>
+                                <div className="text-xl sm:text-2xl font-bold text-red-900">₹{filteredStaff.reduce((sum, s) => sum + calculateWeeklyStats(s.id).balance, 0)}</div>
+                            </div>
+                        </div>
+
+                        {/* Tabs */}
+                        <div className="flex gap-2 overflow-x-auto pb-4 mb-2">
+                            {workTypesList.map((type) => (
+                                <button key={type} onClick={() => setCurrentWorkType(type)}
+                                    className={`px-4 py-2 rounded-lg font-bold whitespace-nowrap transition-colors border-2 ${
+                                        currentWorkType === type ? 'bg-indigo-600 text-white border-indigo-600' : 'bg-white text-gray-600 border-gray-200 hover:bg-gray-50'
+                                    }`}
+                                >
+                                    {workTypesConfig[type].label}
+                                    <span className={`ml-2 px-2 py-0.5 rounded-full text-xs ${currentWorkType === type ? 'bg-indigo-500 text-white' : 'bg-gray-200 text-gray-700'}`}>
+                                        {staffMembers.filter(s => s.workType === type).length}
+                                    </span>
+                                </button>
+                            ))}
+                        </div>
+                    </div>
+
+                    {/* Main Table Card */}
+                    <div className="bg-white rounded-2xl shadow-xl overflow-hidden">
+                        <div className="p-4 bg-indigo-900 text-white font-bold flex flex-col sm:flex-row justify-between gap-2">
+                            <span>{workTypesConfig[currentWorkType].label} Records</span>
+                            <span className="text-sm opacity-75">Showing last 7 days</span>
+                        </div>
+                        
+                        <div className="overflow-x-auto">
+                            {filteredStaff.length === 0 ? (
+                                <div className="p-8 text-center text-gray-500">
+                                    <div className="text-xl mb-2">No staff in this category</div>
+                                    <button onClick={() => setShowAddStaff(true)} className="text-indigo-600 font-bold hover:underline">Add Staff Member</button>
+                                </div>
+                            ) : (
+                                <table className="w-full text-left border-collapse min-w-[600px]">
+                                    <thead>
+                                        <tr className="bg-gray-50 border-b-2 border-gray-200">
+                                            <th className="p-4 min-w-[120px] sticky left-0 bg-gray-50 z-10 border-r shadow-[2px_0_5px_-2px_rgba(0,0,0,0.1)]">Date</th>
+                                            {filteredStaff.map((staff) => {
+                                                 const config = workTypesConfig[staff.workType];
+                                                 return (
+                                                    <th key={staff.id} className="p-4 min-w-[200px] border-r">
+                                                        <div className="flex justify-between items-start">
+                                                            <div>
+                                                                <div className="font-bold text-lg text-indigo-900">{staff.name}</div>
+                                                                <div className="text-xs text-gray-500 mt-1 space-y-0.5">
+                                                                     {config.rateKeys.map(key => (
+                                                                        <div key={key}>{rateKeysConfig[key].label.split(' ')[0]}: ₹{globalRates[key] || 0}</div>
+                                                                     ))}
+                                                                </div>
+                                                            </div>
+                                                            <button onClick={() => deleteStaff(staff.id)} className="text-red-400 hover:text-red-600"><Trash2 size={16} /></button>
+                                                        </div>
+                                                    </th>
+                                                 );
+                                            })}
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {workRecords.slice(0, 7).map((record, idx) => (
+                                            <tr key={record.id} className={idx % 2 === 0 ? 'bg-white' : 'bg-slate-50'}>
+                                                <td className="p-4 border-b border-r sticky left-0 z-10 bg-inherit font-medium shadow-[2px_0_5px_-2px_rgba(0,0,0,0.1)]">
+                                                    <div>{new Date(record.date).toLocaleDateString("en-IN")}</div>
+                                                    <div className="text-xs text-gray-500">{record.day}</div>
+                                                </td>
+                                                {filteredStaff.map((staff) => {
+                                                    const work = record.work[staff.id] || { shirt: 0, pant: 0, earned: 0, paid: 0, balance: 0 };
+                                                    const config = workTypesConfig[staff.workType];
+                                                    const staffRates = getStaffRates(staff);
+                                                    const isHelper = staff.workType === 'helper';
+                                                    
+                                                    return (
+                                                        <td key={staff.id} className="p-3 border-b border-r align-top">
+                                                            <div className="space-y-2">
+                                                                {/* Inputs */}
+                                                                {config.fields.includes("shirt") && (
+                                                                    <div className="flex items-center gap-2">
+                                                                        <span title="Shirts">👔</span>
+                                                                        <input type="number" className="w-16 p-1 border rounded text-center text-sm" 
+                                                                            value={work.shirt || 0} 
+                                                                            onChange={(e) => updateWork(record.id, staff.id, "shirt", e.target.value)} 
+                                                                        />
+                                                                        <span className="text-xs text-gray-400">₹{(work.shirt || 0) * staffRates.shirtRate}</span>
+                                                                    </div>
+                                                                )}
+                                                                {config.fields.includes("pant") && (
+                                                                    <div className="flex items-center gap-2">
+                                                                        <span title="Pants">👖</span>
+                                                                        <input type="number" className="w-16 p-1 border rounded text-center text-sm" 
+                                                                            value={work.pant || 0} 
+                                                                            onChange={(e) => updateWork(record.id, staff.id, "pant", e.target.value)} 
+                                                                        />
+                                                                        <span className="text-xs text-gray-400">₹{(work.pant || 0) * staffRates.pantRate}</span>
+                                                                    </div>
+                                                                )}
+                                                                
+                                                                {/* Payment Section */}
+                                                                <div className="pt-2 border-t mt-2 text-sm">
+                                                                    {!isHelper && (
+                                                                        <div className="flex justify-between">
+                                                                            <span className="text-gray-500">Earned:</span>
+                                                                            <span className="font-bold">₹{work.earned || 0}</span>
+                                                                        </div>
+                                                                    )}
+                                                                    <div className="flex justify-between items-center my-1">
+                                                                        <span className="text-gray-500">{isHelper ? "Paid Today:" : "Paid:"}</span>
+                                                                        <button onClick={() => openPaymentModal(record.id, staff.id, work.paid)} 
+                                                                            className="text-blue-600 font-bold hover:underline bg-blue-50 px-2 rounded">
+                                                                            ₹{work.paid || 0}
+                                                                        </button>
+                                                                    </div>
+                                                                    {!isHelper && (
+                                                                        <div className="flex justify-between border-t pt-1">
+                                                                            <span className="text-gray-500">Bal:</span>
+                                                                            <span className={`font-bold ${work.balance > 0 ? 'text-red-600' : 'text-green-600'}`}>
+                                                                                ₹{work.balance || 0}
+                                                                            </span>
+                                                                        </div>
+                                                                    )}
+                                                                </div>
+                                                            </div>
+                                                        </td>
+                                                    );
+                                                })}
+                                            </tr>
+                                        ))}
+                                        {/* Total Row */}
+                                        <tr className="bg-indigo-50 font-bold border-t-4 border-indigo-100">
+                                            <td className="p-4 sticky left-0 bg-indigo-50 z-10 border-r shadow-[2px_0_5px_-2px_rgba(0,0,0,0.1)] text-indigo-900">Weekly Total</td>
+                                            {filteredStaff.map((staff) => {
+                                                const stats = calculateWeeklyStats(staff.id);
+                                                const isHelper = staff.workType === 'helper';
+                                                
+                                                return (
+                                                    <td key={staff.id} className="p-4 border-r text-center">
+                                                        <div className={`grid ${isHelper ? 'grid-cols-1' : 'grid-cols-3'} gap-2 text-sm`}>
+                                                            {!isHelper && (
+                                                                <div className="text-indigo-800">
+                                                                    <div className="text-xs opacity-75">Earned</div>
+                                                                    ₹{stats.earned}
+                                                                </div>
+                                                            )}
+                                                            <div className="text-blue-700">
+                                                                <div className="text-xs opacity-75">Paid</div>
+                                                                ₹{stats.paid}
+                                                            </div>
+                                                            {!isHelper && (
+                                                                <div className={stats.balance > 0 ? 'text-red-600' : 'text-green-600'}>
+                                                                    <div className="text-xs opacity-75">Bal</div>
+                                                                    ₹{stats.balance}
+                                                                </div>
+                                                            )}
+                                                        </div>
+                                                    </td>
+                                                );
+                                            })}
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            )}
+                        </div>
+                    </div>
+
+                    {/* Modals using fixed overlay positioning */}
+                    {/* Add Staff Modal */}
+                    {showAddStaff && (
+                        <div className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50 p-4">
+                            <div className="bg-white rounded-xl w-full max-w-md p-6 shadow-2xl animate-pulse-fast">
+                                <h3 className="text-xl font-bold mb-4">Add New Staff</h3>
+                                <div className="space-y-4">
+                                    <div>
+                                        <label className="block text-sm font-bold mb-1">Name</label>
+                                        <input type="text" className="w-full p-2 border-2 rounded-lg" value={newStaff.name} onChange={(e) => setNewStaff({...newStaff, name: e.target.value})} placeholder="Staff Name" />
+                                    </div>
+                                    <div>
+                                        <label className="block text-sm font-bold mb-1">Role</label>
+                                        <select className="w-full p-2 border-2 rounded-lg" value={newStaff.workType} onChange={(e) => setNewStaff({...newStaff, workType: e.target.value})}>
+                                            {Object.entries(workTypesConfig).map(([key, val]) => <option key={key} value={key}>{val.label}</option>)}
+                                        </select>
+                                    </div>
+                                    <div className="flex gap-3 justify-end mt-6">
+                                        <button onClick={() => setShowAddStaff(false)} className="px-4 py-2 text-gray-600 font-bold">Cancel</button>
+                                        <button onClick={addStaff} className="px-4 py-2 bg-green-600 text-white rounded-lg font-bold hover:bg-green-700">Add Staff</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Rate Setter Modal */}
+                    {showRateSetter && (
+                         <div className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50 p-4">
+                            <div className="bg-white rounded-xl w-full max-w-lg p-6 shadow-2xl max-h-[90vh] overflow-y-auto">
+                                <h3 className="text-xl font-bold mb-4 flex items-center gap-2"><DollarSign size={24}/> Global Rates (₹)</h3>
+                                <p className="text-sm text-gray-500 mb-4">These rates apply to all staff members.</p>
+                                <div className="grid grid-cols-2 gap-4">
+                                    {Object.entries(rateKeysConfig).map(([key, config]) => (
+                                        <div key={key}>
+                                            <label className="block text-xs font-bold text-gray-700 mb-1">{config.label}</label>
+                                            <input type="number" className="w-full p-2 border rounded-lg bg-gray-50" 
+                                                value={tempRates[key] || 0} 
+                                                onChange={(e) => setTempRates({...tempRates, [key]: e.target.value})} 
+                                            />
+                                        </div>
+                                    ))}
+                                </div>
+                                <div className="flex gap-3 justify-end mt-6 border-t pt-4">
+                                    <button onClick={() => setShowRateSetter(false)} className="px-4 py-2 text-gray-600 font-bold">Cancel</button>
+                                    <button onClick={updateGlobalRates} className="px-4 py-2 bg-yellow-500 text-white rounded-lg font-bold hover:bg-yellow-600">Save Rates</button>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Payment Modal */}
+                    {showPaymentModal && (
+                        <div className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50 p-4">
+                            <div className="bg-white rounded-xl w-full max-w-sm p-6 shadow-2xl">
+                                <h3 className="text-xl font-bold mb-4">💰 Record Payment</h3>
+                                <div>
+                                    <label className="block text-sm font-bold mb-1">Amount Paid (₹)</label>
+                                    <input type="number" autoFocus className="w-full p-3 border-2 border-green-500 rounded-lg text-xl font-bold" 
+                                        value={selectedPayment.amount} 
+                                        onChange={(e) => setSelectedPayment({...selectedPayment, amount: e.target.value})} 
+                                    />
+                                    <p className="text-xs text-gray-500 mt-2">Enter actual amount given to staff.</p>
+                                </div>
+                                <div className="flex gap-3 justify-end mt-6">
+                                    <button onClick={() => setShowPaymentModal(false)} className="px-4 py-2 text-gray-600 font-bold">Cancel</button>
+                                    <button onClick={savePayment} className="px-4 py-2 bg-green-600 text-white rounded-lg font-bold hover:bg-green-700">Save Payment</button>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
+                </div>
+            );
+        }
+
         // Customer Database Page
         function CustomerDatabase({ onBack, customers, orders, setOrders, loading }) {
             const [searchQuery, setSearchQuery] = useState('');
             const [expandedCustomer, setExpandedCustomer] = useState(null);
             const [viewingPhoto, setViewingPhoto] = useState(null);
-            const [filterType, setFilterType] = useState('all'); // 'all', 'pending', 'overdue'
+            const [filterType, setFilterType] = useState('all');
             const [showScrollTop, setShowScrollTop] = useState(false);
 
             useEffect(() => {
@@ -414,16 +924,12 @@
                         setShowScrollTop(false);
                     }
                 };
-
                 window.addEventListener('scroll', handleScroll);
                 return () => window.removeEventListener('scroll', handleScroll);
             }, []);
 
             const scrollToTop = () => {
-                window.scrollTo({
-                    top: 0,
-                    behavior: 'smooth'
-                });
+                window.scrollTo({ top: 0, behavior: 'smooth' });
             };
 
             const isOrderOverdue = (order) => {
@@ -439,7 +945,6 @@
                     customer.phone.includes(searchQuery) || 
                     customer.name.toLowerCase().includes(searchQuery.toLowerCase())
                 );
-
                 // Apply filter based on order status
                 if (filterType === 'pending') {
                     filtered = filtered.filter(customer => {
@@ -477,7 +982,6 @@
                     await db.collection('orders').doc(orderId).update({
                         delivered: !order.delivered
                     });
-                    
                     const updatedOrders = orders.map(o => {
                         if (o.id === orderId) {
                             return { ...o, delivered: !o.delivered };
@@ -490,12 +994,10 @@
                     alert('Failed to update order status');
                 }
             };
-
             const deleteOrder = async (orderId, customerId) => {
                 if (confirm('Are you sure you want to delete this order? This cannot be undone.')) {
                     try {
                         await db.collection('orders').doc(orderId).delete();
-                        
                         const updatedOrders = orders.filter(order => order.id !== orderId);
                         setOrders(updatedOrders);
                         
@@ -510,7 +1012,6 @@
                     }
                 }
             };
-
             const getTotalPending = () => {
                 return orders.filter(o => !o.delivered).reduce((sum, o) => sum + o.balance, 0);
             };
@@ -534,7 +1035,7 @@
                     {loading && <LoadingOverlay message="Loading data..." />}
                     
                     {/* Scroll to Top Button */}
-                    {showScrollTop && (
+                     {showScrollTop && (
                         <button
                             onClick={scrollToTop}
                             className="fixed bottom-8 right-8 bg-blue-600 hover:bg-blue-700 text-white w-14 h-14 rounded-full shadow-2xl flex items-center justify-center z-50 transition-all transform hover:scale-110"
@@ -549,7 +1050,7 @@
                             className="fixed inset-0 bg-black bg-opacity-90 z-50 flex items-center justify-center p-4"
                             onClick={() => setViewingPhoto(null)}
                         >
-                            <button
+                             <button
                                 onClick={() => setViewingPhoto(null)}
                                 className="absolute top-4 right-4 bg-red-600 text-white w-12 h-12 rounded-full flex items-center justify-center text-2xl font-bold hover:bg-red-700 z-10"
                                 style={{ fontSize: '24px' }}
@@ -660,7 +1161,6 @@
                                     const pendingOrders = customerOrders.filter(o => !o.delivered);
                                     const overdueOrders = customerOrders.filter(o => isOrderOverdue(o));
                                     const totalBalance = pendingOrders.reduce((sum, o) => sum + o.balance, 0);
-
                                     return (
                                         <div key={customer.id} className="bg-white rounded-xl shadow-lg overflow-hidden border-2 border-purple-200">
                                             <div 
@@ -726,7 +1226,7 @@
                                                                                 <Trash2 size={14} />
                                                                             </button>
                                                                         </div>
-                                                                        
+                                                                    
                                                                         <div className="mb-2 pb-2 border-b border-gray-200 text-xs">
                                                                             <div className="flex justify-between mb-0.5">
                                                                                 <span className="text-gray-600">Total:</span>
@@ -797,7 +1297,7 @@
         }
 
         // Home Page (Bill Creation)
-        function HomePage({ onOpenDatabase, customers, setCustomers, orders, setOrders }) {
+        function HomePage({ onOpenDatabase, onOpenStaff, customers, setCustomers, orders, setOrders }) {
             const [cardNumber, setCardNumber] = useState('');
             const [customerName, setCustomerName] = useState('');
             const [phoneNumber, setPhoneNumber] = useState('');
@@ -812,7 +1312,6 @@
             const [loading, setLoading] = useState(false);
             const billRef = useRef(null);
             const fileInputRef = useRef(null);
-
             const addItem = () => {
                 setItems([...items, { shirts: '', pants: '', amount: '' }]);
             };
@@ -822,7 +1321,6 @@
                     setItems(items.filter((_, i) => i !== index));
                 }
             };
-
             const updateItem = (index, field, value) => {
                 const newItems = [...items];
                 newItems[index][field] = value;
@@ -838,14 +1336,12 @@
                 const adv = parseFloat(advance) || 0;
                 return total - adv;
             };
-
             const searchCustomers = (phone) => {
                 if (phone.length >= 3) {
                     return customers.filter(c => c.phone.includes(phone));
                 }
                 return [];
             };
-
             const selectCustomer = (customer) => {
                 setPhoneNumber(customer.phone);
                 setCustomerName(customer.name);
@@ -864,7 +1360,6 @@
                     reader.readAsDataURL(file);
                 }
             };
-
             const removePhoto = () => {
                 setMeasurementPhoto(null);
                 setMeasurementPhotoFile(null);
@@ -872,11 +1367,9 @@
                     fileInputRef.current.value = '';
                 }
             };
-
             const saveOrder = async () => {
                 try {
                     setLoading(true);
-                    
                     // Upload photo to Cloudinary if exists - HIGH QUALITY
                     let photoUrl = null;
                     if (measurementPhotoFile) {
@@ -893,7 +1386,6 @@
 
                     // Find or create customer
                     let customer = customers.find(c => c.phone === phoneNumber);
-                    
                     if (!customer) {
                         const customerRef = db.collection('customers').doc();
                         customer = {
@@ -934,7 +1426,6 @@
                         measurementPhoto: photoUrl,
                         createdAt: new Date().toISOString()
                     };
-
                     await orderRef.set(order);
                     setOrders([...orders, order]);
                     
@@ -953,10 +1444,8 @@
                     throw error;
                 }
             };
-
             const downloadBill = async () => {
                 const element = billRef.current;
-                
                 const originalWidth = element.style.width;
                 element.style.width = '600px';
                 
@@ -967,7 +1456,6 @@
                     width: 600,
                     windowWidth: 600
                 });
-                
                 element.style.width = originalWidth;
 
                 canvas.toBlob((blob) => {
@@ -1006,7 +1494,6 @@
                     console.error('Error sharing bill:', error);
                 }
             };
-
             const shareSMS = async () => {
                 if (!phoneNumber || phoneNumber.length < 10) {
                     alert('10 ಅಂಕಿಯ ಫೋನ್ ಸಂಖ್ಯೆಯನ್ನು ನಮೂದಿಸಿ\nPlease enter customer phone number (10 digits)');
@@ -1015,14 +1502,14 @@
 
                 try {
                     await saveOrder();
-
                     let formattedPhone = phoneNumber.replace(/\D/g, '');
                     if (formattedPhone.length === 10) {
                         formattedPhone = '+91' + formattedPhone;
                     }
 
                     const readyDateText = readyDate ? `\nReady By: ${readyDate}` : '';
-                    const message = `Hi ${customerName}! Your bill from Polo Fashions is ready.\n\nCard No: ${cardNumber}\nDate: ${date}${readyDateText}\nTotal: Rs.${calculateTotal()}\nAdvance: Rs.${advance || 0}\nBalance: Rs.${calculateBalance()}\n\nYour digital Card is generated.\n\nPolo Fashions\nMob: 9742445626`;
+                    const message = `Hi ${customerName}!
+Your bill from Polo Fashions is ready.\n\nCard No: ${cardNumber}\nDate: ${date}${readyDateText}\nTotal: Rs.${calculateTotal()}\nAdvance: Rs.${advance || 0}\nBalance: Rs.${calculateBalance()}\n\nYour digital Card is generated.\n\nPolo Fashions\nMob: 9742445626`;
 
                     const smsUrl = `sms:${formattedPhone}?body=${encodeURIComponent(message)}`;
                     window.location.href = smsUrl;
@@ -1030,7 +1517,6 @@
                     console.error('Error sharing SMS:', error);
                 }
             };
-
             const clearForm = () => {
                 setCardNumber('');
                 setCustomerName('');
@@ -1046,7 +1532,6 @@
                     fileInputRef.current.value = '';
                 }
             };
-
             const isOverdue = () => {
                 if (!readyDate) return false;
                 return new Date(readyDate) < new Date();
@@ -1061,13 +1546,20 @@
                             <h1 className="text-2xl font-bold text-blue-900 flex items-center gap-2">
                                 👔 Polo Fashions
                             </h1>
-                            <button
-                                onClick={onOpenDatabase}
-                                className="flex items-center gap-2 bg-purple-600 text-white px-4 py-2 rounded-xl text-sm font-bold hover:bg-purple-700"
-                            >
-                                <Users size={20} />
-                                Database
-                            </button>
+                            <div className="flex gap-2">
+                                <button
+                                    onClick={onOpenStaff}
+                                    className="flex items-center gap-2 bg-indigo-600 text-white px-4 py-2 rounded-xl text-sm font-bold hover:bg-indigo-700"
+                                >
+                                    <Users size={20} /> Staff
+                                </button>
+                                <button
+                                    onClick={onOpenDatabase}
+                                    className="flex items-center gap-2 bg-purple-600 text-white px-4 py-2 rounded-xl text-sm font-bold hover:bg-purple-700"
+                                >
+                                    <Cloud size={20} /> Database
+                                </button>
+                            </div>
                         </div>
 
                         <div className="space-y-6 mb-8">
@@ -1383,7 +1875,6 @@
             const [customers, setCustomers] = useState([]);
             const [orders, setOrders] = useState([]);
             const [loading, setLoading] = useState(true);
-
             useEffect(() => {
                 const loadData = async () => {
                     try {
@@ -1408,7 +1899,6 @@
                         alert('Failed to load data from cloud. Please refresh the page.');
                     }
                 };
-
                 loadData();
             }, []);
 
@@ -1427,10 +1917,19 @@
                     />
                 );
             }
+            
+            if (currentPage === 'staff') {
+                return (
+                    <StaffManagement 
+                        onBack={() => setCurrentPage('home')}
+                    />
+                );
+            }
 
             return (
                 <HomePage 
                     onOpenDatabase={() => setCurrentPage('database')}
+                    onOpenStaff={() => setCurrentPage('staff')}
                     customers={customers}
                     setCustomers={setCustomers}
                     orders={orders}
