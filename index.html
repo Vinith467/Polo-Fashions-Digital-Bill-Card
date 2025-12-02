@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
     <title>Polo Fashions - Digital Bill & Staff</title>
-    <link rel="shortcut icon" href="/icon.jpg" type="image/x-icon">
+   <link rel="shortcut icon" href="/icon.jpg" type="image/x-icon">
     <script src="https://cdn.tailwindcss.com"></script>
 
     <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
@@ -22,13 +22,11 @@
         * {
             box-sizing: border-box;
         }
-
         body {
             margin: 0;
             padding: 0;
             background: #f3f4f6;
         }
-
         .app-container {
             max-width: 1400px;
             margin: 0 auto;
@@ -37,20 +35,17 @@
             flex-direction: column;
             gap: 20px;
         }
-
         .card {
             background: white;
             padding: 15px;
             border-radius: 12px;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
         }
-
         .bill-preview {
             width: 100%;
         }
-
         .card-bill {
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.15);
             border-radius: 12px;
             width: 600px;
             max-width: 100%;
@@ -59,22 +54,18 @@
             padding: 32px;
             box-sizing: border-box;
         }
-
         .bill-border {
             border: 2px solid #1e3a8a;
             padding: 15px;
             border-radius: 8px;
             background: white;
         }
-
         .name-card {
             background: white;
         }
-
         .address-card {
             background: white;
         }
-
         .customer-suggestion {
             position: absolute;
             background: white;
@@ -84,25 +75,21 @@
             overflow-y: auto;
             width: 100%;
             z-index: 1000;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
         }
-
         .customer-item {
             padding: 12px;
             cursor: pointer;
             border-bottom: 1px solid #e5e7eb;
         }
-
         .customer-item:hover {
             background: #dbeafe;
         }
-
         .database-container {
             max-width: 100%;
             margin: 0 auto;
             padding: 10px;
         }
-
         .toggle-switch {
             position: relative;
             display: inline-block;
@@ -110,13 +97,11 @@
             height: 28px;
             flex-shrink: 0;
         }
-
         .toggle-switch input {
             opacity: 0;
             width: 0;
             height: 0;
         }
-
         .slider {
             position: absolute;
             cursor: pointer;
@@ -128,7 +113,6 @@
             transition: .4s;
             border-radius: 28px;
         }
-
         .slider:before {
             position: absolute;
             content: "";
@@ -140,44 +124,34 @@
             transition: .4s;
             border-radius: 50%;
         }
-
-        input:checked+.slider {
+        input:checked + .slider {
             background-color: #22c55e;
         }
-
-        input:checked+.slider:before {
+        input:checked + .slider:before {
             transform: translateX(22px);
         }
-
+        
         @keyframes pulse {
-
-            0%,
-            100% {
-                opacity: 1;
-            }
-
-            50% {
-                opacity: 0.7;
-            }
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
         }
-
         .animate-pulse {
             animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
         }
-
+        
         .loading-overlay {
             position: fixed;
             top: 0;
             left: 0;
             right: 0;
             bottom: 0;
-            background: rgba(0, 0, 0, 0.7);
+            background: rgba(0,0,0,0.7);
             display: flex;
             align-items: center;
             justify-content: center;
             z-index: 9999;
         }
-
+        
         .loader {
             border: 5px solid #f3f3f3;
             border-top: 5px solid #3b82f6;
@@ -186,27 +160,15 @@
             height: 50px;
             animation: spin 1s linear infinite;
         }
-
+        
         @keyframes spin {
-            0% {
-                transform: rotate(0deg);
-            }
-
-            100% {
-                transform: rotate(360deg);
-            }
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
         }
-
+        
         @keyframes fadeIn {
-            from {
-                opacity: 0;
-                transform: scale(0.8);
-            }
-
-            to {
-                opacity: 1;
-                transform: scale(1);
-            }
+            from { opacity: 0; transform: scale(0.8); }
+            to { opacity: 1; transform: scale(1); }
         }
 
         /* Responsive Typography */
@@ -214,16 +176,14 @@
             .card {
                 padding: 12px;
             }
-
             .bill-border {
                 padding: 15px;
             }
-
             h1 {
                 font-size: 1.5rem !important;
             }
         }
-
+        
         /* Desktop layout */
         @media (min-width: 1024px) {
             .app-container {
@@ -232,21 +192,17 @@
                 gap: 30px;
                 padding: 20px;
             }
-
             .card {
                 padding: 30px;
             }
-
             .bill-preview {
                 position: sticky;
                 top: 20px;
                 height: fit-content;
             }
-
             .card-bill {
                 padding: 32px;
             }
-
             .database-container {
                 max-width: 1200px;
                 padding: 20px;
@@ -331,7 +287,7 @@
 
     <script type="text/babel">
         const { useState, useRef, useEffect, useCallback } = React;
-
+        
         // --- Staff Configuration Constants ---
         const workTypesConfig = {
             pant_maker: {
@@ -354,7 +310,7 @@
                 fields: ["shirt", "pant"],
                 rateKeys: ["shirtIronCost", "pantIronCost"],
             },
-            helper: { label: "Helper", fields: [], rateKeys: [] },
+            helper: { label: "Helper", fields: [], rateKeys: [] }, 
         };
 
         const rateKeysConfig = {
@@ -618,7 +574,7 @@
                     const staff = staffMembers.find((s) => s.id === staffId);
                     const record = workRecords.find((r) => r.id === recordId);
                     const work = record.work[staffId] || { shirt: 0, pant: 0, earned: 0, paid: 0, balance: 0 };
-
+                    
                     const updatedWork = { ...work, [field]: parseInt(value) || 0 };
 
                     if (staff.workType !== "helper") {
@@ -676,7 +632,7 @@
             return (
                 <div className="database-container">
                     {loading && <LoadingOverlay message="Loading staff data..." />}
-
+                    
                     <div className="bg-white rounded-2xl shadow-xl p-4 sm:p-6 mb-6">
                         {/* Mobile Optimized Header */}
                         <div className="flex flex-col md:flex-row justify-between items-center mb-6 gap-4">
@@ -698,7 +654,7 @@
 
                         {/* Stats Dashboard */}
                         <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
-                            <div className="bg-indigo-50 p-3 rounded-lg border-2 border-indigo-200">
+                             <div className="bg-indigo-50 p-3 rounded-lg border-2 border-indigo-200">
                                 <div className="text-xs sm:text-sm text-indigo-700 font-semibold">Total Staff</div>
                                 <div className="text-xl sm:text-2xl font-bold text-indigo-900">{staffMembers.length}</div>
                             </div>
@@ -720,8 +676,9 @@
                         <div className="flex gap-2 overflow-x-auto pb-4 mb-2">
                             {workTypesList.map((type) => (
                                 <button key={type} onClick={() => setCurrentWorkType(type)}
-                                    className={`px-4 py-2 rounded-lg font-bold whitespace-nowrap transition-colors border-2 ${currentWorkType === type ? 'bg-indigo-600 text-white border-indigo-600' : 'bg-white text-gray-600 border-gray-200 hover:bg-gray-50'
-                                        }`}
+                                    className={`px-4 py-2 rounded-lg font-bold whitespace-nowrap transition-colors border-2 ${
+                                        currentWorkType === type ? 'bg-indigo-600 text-white border-indigo-600' : 'bg-white text-gray-600 border-gray-200 hover:bg-gray-50'
+                                    }`}
                                 >
                                     {workTypesConfig[type].label}
                                     <span className={`ml-2 px-2 py-0.5 rounded-full text-xs ${currentWorkType === type ? 'bg-indigo-500 text-white' : 'bg-gray-200 text-gray-700'}`}>
@@ -738,7 +695,7 @@
                             <span>{workTypesConfig[currentWorkType].label} Records</span>
                             <span className="text-sm opacity-75">Showing last 7 days</span>
                         </div>
-
+                        
                         <div className="overflow-x-auto">
                             {filteredStaff.length === 0 ? (
                                 <div className="p-8 text-center text-gray-500">
@@ -751,22 +708,22 @@
                                         <tr className="bg-gray-50 border-b-2 border-gray-200">
                                             <th className="p-4 min-w-[120px] sticky left-0 bg-gray-50 z-10 border-r shadow-[2px_0_5px_-2px_rgba(0,0,0,0.1)]">Date</th>
                                             {filteredStaff.map((staff) => {
-                                                const config = workTypesConfig[staff.workType];
-                                                return (
+                                                 const config = workTypesConfig[staff.workType];
+                                                 return (
                                                     <th key={staff.id} className="p-4 min-w-[200px] border-r">
                                                         <div className="flex justify-between items-start">
                                                             <div>
                                                                 <div className="font-bold text-lg text-indigo-900">{staff.name}</div>
                                                                 <div className="text-xs text-gray-500 mt-1 space-y-0.5">
-                                                                    {config.rateKeys.map(key => (
+                                                                     {config.rateKeys.map(key => (
                                                                         <div key={key}>{rateKeysConfig[key].label.split(' ')[0]}: ₹{globalRates[key] || 0}</div>
-                                                                    ))}
+                                                                     ))}
                                                                 </div>
                                                             </div>
                                                             <button onClick={() => deleteStaff(staff.id)} className="text-red-400 hover:text-red-600"><Trash2 size={16} /></button>
                                                         </div>
                                                     </th>
-                                                );
+                                                 );
                                             })}
                                         </tr>
                                     </thead>
@@ -782,7 +739,7 @@
                                                     const config = workTypesConfig[staff.workType];
                                                     const staffRates = getStaffRates(staff);
                                                     const isHelper = staff.workType === 'helper';
-
+                                                    
                                                     return (
                                                         <td key={staff.id} className="p-3 border-b border-r align-top">
                                                             <div className="space-y-2">
@@ -790,9 +747,9 @@
                                                                 {config.fields.includes("shirt") && (
                                                                     <div className="flex items-center gap-2">
                                                                         <span title="Shirts">👔</span>
-                                                                        <input type="number" className="w-16 p-1 border rounded text-center text-sm"
-                                                                            value={work.shirt || 0}
-                                                                            onChange={(e) => updateWork(record.id, staff.id, "shirt", e.target.value)}
+                                                                        <input type="number" className="w-16 p-1 border rounded text-center text-sm" 
+                                                                            value={work.shirt || 0} 
+                                                                            onChange={(e) => updateWork(record.id, staff.id, "shirt", e.target.value)} 
                                                                         />
                                                                         <span className="text-xs text-gray-400">₹{(work.shirt || 0) * staffRates.shirtRate}</span>
                                                                     </div>
@@ -800,14 +757,14 @@
                                                                 {config.fields.includes("pant") && (
                                                                     <div className="flex items-center gap-2">
                                                                         <span title="Pants">👖</span>
-                                                                        <input type="number" className="w-16 p-1 border rounded text-center text-sm"
-                                                                            value={work.pant || 0}
-                                                                            onChange={(e) => updateWork(record.id, staff.id, "pant", e.target.value)}
+                                                                        <input type="number" className="w-16 p-1 border rounded text-center text-sm" 
+                                                                            value={work.pant || 0} 
+                                                                            onChange={(e) => updateWork(record.id, staff.id, "pant", e.target.value)} 
                                                                         />
                                                                         <span className="text-xs text-gray-400">₹{(work.pant || 0) * staffRates.pantRate}</span>
                                                                     </div>
                                                                 )}
-
+                                                                
                                                                 {/* Payment Section */}
                                                                 <div className="pt-2 border-t mt-2 text-sm">
                                                                     {!isHelper && (
@@ -818,7 +775,7 @@
                                                                     )}
                                                                     <div className="flex justify-between items-center my-1">
                                                                         <span className="text-gray-500">{isHelper ? "Paid Today:" : "Paid:"}</span>
-                                                                        <button onClick={() => openPaymentModal(record.id, staff.id, work.paid)}
+                                                                        <button onClick={() => openPaymentModal(record.id, staff.id, work.paid)} 
                                                                             className="text-blue-600 font-bold hover:underline bg-blue-50 px-2 rounded">
                                                                             ₹{work.paid || 0}
                                                                         </button>
@@ -844,7 +801,7 @@
                                             {filteredStaff.map((staff) => {
                                                 const stats = calculateWeeklyStats(staff.id);
                                                 const isHelper = staff.workType === 'helper';
-
+                                                
                                                 return (
                                                     <td key={staff.id} className="p-4 border-r text-center">
                                                         <div className={`grid ${isHelper ? 'grid-cols-1' : 'grid-cols-3'} gap-2 text-sm`}>
@@ -884,11 +841,11 @@
                                 <div className="space-y-4">
                                     <div>
                                         <label className="block text-sm font-bold mb-1">Name</label>
-                                        <input type="text" className="w-full p-2 border-2 rounded-lg" value={newStaff.name} onChange={(e) => setNewStaff({ ...newStaff, name: e.target.value })} placeholder="Staff Name" />
+                                        <input type="text" className="w-full p-2 border-2 rounded-lg" value={newStaff.name} onChange={(e) => setNewStaff({...newStaff, name: e.target.value})} placeholder="Staff Name" />
                                     </div>
                                     <div>
                                         <label className="block text-sm font-bold mb-1">Role</label>
-                                        <select className="w-full p-2 border-2 rounded-lg" value={newStaff.workType} onChange={(e) => setNewStaff({ ...newStaff, workType: e.target.value })}>
+                                        <select className="w-full p-2 border-2 rounded-lg" value={newStaff.workType} onChange={(e) => setNewStaff({...newStaff, workType: e.target.value})}>
                                             {Object.entries(workTypesConfig).map(([key, val]) => <option key={key} value={key}>{val.label}</option>)}
                                         </select>
                                     </div>
@@ -903,17 +860,17 @@
 
                     {/* Rate Setter Modal */}
                     {showRateSetter && (
-                        <div className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50 p-4">
+                         <div className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50 p-4">
                             <div className="bg-white rounded-xl w-full max-w-lg p-6 shadow-2xl max-h-[90vh] overflow-y-auto">
-                                <h3 className="text-xl font-bold mb-4 flex items-center gap-2"><DollarSign size={24} /> Global Rates (₹)</h3>
+                                <h3 className="text-xl font-bold mb-4 flex items-center gap-2"><DollarSign size={24}/> Global Rates (₹)</h3>
                                 <p className="text-sm text-gray-500 mb-4">These rates apply to all staff members.</p>
                                 <div className="grid grid-cols-2 gap-4">
                                     {Object.entries(rateKeysConfig).map(([key, config]) => (
                                         <div key={key}>
                                             <label className="block text-xs font-bold text-gray-700 mb-1">{config.label}</label>
-                                            <input type="number" className="w-full p-2 border rounded-lg bg-gray-50"
-                                                value={tempRates[key] || 0}
-                                                onChange={(e) => setTempRates({ ...tempRates, [key]: e.target.value })}
+                                            <input type="number" className="w-full p-2 border rounded-lg bg-gray-50" 
+                                                value={tempRates[key] || 0} 
+                                                onChange={(e) => setTempRates({...tempRates, [key]: e.target.value})} 
                                             />
                                         </div>
                                     ))}
@@ -933,9 +890,9 @@
                                 <h3 className="text-xl font-bold mb-4">💰 Record Payment</h3>
                                 <div>
                                     <label className="block text-sm font-bold mb-1">Amount Paid (₹)</label>
-                                    <input type="number" autoFocus className="w-full p-3 border-2 border-green-500 rounded-lg text-xl font-bold"
-                                        value={selectedPayment.amount}
-                                        onChange={(e) => setSelectedPayment({ ...selectedPayment, amount: e.target.value })}
+                                    <input type="number" autoFocus className="w-full p-3 border-2 border-green-500 rounded-lg text-xl font-bold" 
+                                        value={selectedPayment.amount} 
+                                        onChange={(e) => setSelectedPayment({...selectedPayment, amount: e.target.value})} 
                                     />
                                     <p className="text-xs text-gray-500 mt-2">Enter actual amount given to staff.</p>
                                 </div>
@@ -984,8 +941,8 @@
             };
 
             const getFilteredCustomers = () => {
-                let filtered = customers.filter(customer =>
-                    customer.phone.includes(searchQuery) ||
+                let filtered = customers.filter(customer => 
+                    customer.phone.includes(searchQuery) || 
                     customer.name.toLowerCase().includes(searchQuery.toLowerCase())
                 );
                 // Apply filter based on order status
@@ -1014,7 +971,7 @@
             const filteredCustomers = getFilteredCustomers();
 
             const getCustomerOrders = (customerId) => {
-                return orders.filter(o => o.customerId === customerId).sort((a, b) =>
+                return orders.filter(o => o.customerId === customerId).sort((a, b) => 
                     new Date(b.createdAt) - new Date(a.createdAt)
                 );
             };
@@ -1043,12 +1000,11 @@
                         await db.collection('orders').doc(orderId).delete();
                         const updatedOrders = orders.filter(order => order.id !== orderId);
                         setOrders(updatedOrders);
-
+                        
                         const customerHasOrders = updatedOrders.some(o => o.customerId === customerId);
                         if (!customerHasOrders) {
                             await db.collection('customers').doc(customerId).delete();
-                            // Remove the customer from your customers state as well
-                            setCustomers(prevCustomers => prevCustomers.filter(c => c.id !== customerId));
+                            window.location.reload();
                         }
                     } catch (error) {
                         console.error('Error deleting order:', error);
@@ -1077,9 +1033,9 @@
             return (
                 <div className="database-container">
                     {loading && <LoadingOverlay message="Loading data..." />}
-
+                    
                     {/* Scroll to Top Button */}
-                    {showScrollTop && (
+                     {showScrollTop && (
                         <button
                             onClick={scrollToTop}
                             className="fixed bottom-8 right-8 bg-blue-600 hover:bg-blue-700 text-white w-14 h-14 rounded-full shadow-2xl flex items-center justify-center z-50 transition-all transform hover:scale-110"
@@ -1088,13 +1044,13 @@
                             <ArrowUp size={28} />
                         </button>
                     )}
-
+                    
                     {viewingPhoto && (
-                        <div
+                        <div 
                             className="fixed inset-0 bg-black bg-opacity-90 z-50 flex items-center justify-center p-4"
                             onClick={() => setViewingPhoto(null)}
                         >
-                            <button
+                             <button
                                 onClick={() => setViewingPhoto(null)}
                                 className="absolute top-4 right-4 bg-red-600 text-white w-12 h-12 rounded-full flex items-center justify-center text-2xl font-bold hover:bg-red-700 z-10"
                                 style={{ fontSize: '24px' }}
@@ -1109,7 +1065,7 @@
                             />
                         </div>
                     )}
-
+                    
                     <div className="bg-white rounded-2xl shadow-xl p-6 mb-6">
                         <div className="flex justify-between items-center mb-4">
                             <h1 className="text-4xl font-bold text-purple-900 flex items-center gap-3">
@@ -1126,35 +1082,37 @@
                         </div>
 
                         <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6">
-                            <div
+                            <div 
                                 className="bg-purple-50 p-4 rounded-lg border-2 border-purple-300 cursor-default"
                             >
                                 <div className="text-sm text-purple-700 font-semibold">Total Customers</div>
                                 <div className="text-3xl font-bold text-purple-900">{customers.length}</div>
                             </div>
-                            <div
+                            <div 
                                 onClick={() => setFilterType(filterType === 'pending' ? 'all' : 'pending')}
-                                className={`p-4 rounded-lg border-2 cursor-pointer transition-all ${filterType === 'pending'
-                                        ? 'bg-orange-200 border-orange-500 shadow-lg'
+                                className={`p-4 rounded-lg border-2 cursor-pointer transition-all ${
+                                    filterType === 'pending' 
+                                        ? 'bg-orange-200 border-orange-500 shadow-lg' 
                                         : 'bg-orange-50 border-orange-300 hover:bg-orange-100'
-                                    }`}
+                                }`}
                             >
                                 <div className="text-sm text-orange-700 font-semibold">Pending Orders</div>
                                 <div className="text-3xl font-bold text-orange-900">{getPendingCount()}</div>
                                 {filterType === 'pending' && <div className="text-xs text-orange-600 mt-1">✓ Active Filter</div>}
                             </div>
-                            <div
+                            <div 
                                 onClick={() => setFilterType(filterType === 'overdue' ? 'all' : 'overdue')}
-                                className={`p-4 rounded-lg border-2 cursor-pointer transition-all ${filterType === 'overdue'
-                                        ? 'bg-red-200 border-red-500 shadow-lg'
+                                className={`p-4 rounded-lg border-2 cursor-pointer transition-all ${
+                                    filterType === 'overdue' 
+                                        ? 'bg-red-200 border-red-500 shadow-lg' 
                                         : 'bg-red-50 border-red-300 hover:bg-red-100'
-                                    }`}
+                                }`}
                             >
                                 <div className="text-sm text-red-700 font-semibold">⚠️ Overdue</div>
                                 <div className="text-3xl font-bold text-red-900">{getOverdueCount()}</div>
                                 {filterType === 'overdue' && <div className="text-xs text-red-600 mt-1">✓ Active Filter</div>}
                             </div>
-                            <div
+                            <div 
                                 className="bg-green-50 p-4 rounded-lg border-2 border-green-300 cursor-default"
                             >
                                 <div className="text-sm text-green-700 font-semibold">Total Balance</div>
@@ -1177,10 +1135,10 @@
                     <div className="space-y-4">
                         {filteredCustomers.length === 0 ? (
                             <div className="bg-white rounded-xl p-8 text-center text-gray-500">
-                                {searchQuery ? 'No customers found matching your search.' :
-                                    filterType === 'pending' ? 'No pending orders found.' :
-                                        filterType === 'overdue' ? 'No overdue orders found.' :
-                                            'No customers yet. Create your first bill!'}
+                                {searchQuery ? 'No customers found matching your search.' : 
+                                 filterType === 'pending' ? 'No pending orders found.' :
+                                 filterType === 'overdue' ? 'No overdue orders found.' :
+                                 'No customers yet. Create your first bill!'}
                             </div>
                         ) : (
                             <>
@@ -1205,7 +1163,7 @@
                                     const totalBalance = pendingOrders.reduce((sum, o) => sum + o.balance, 0);
                                     return (
                                         <div key={customer.id} className="bg-white rounded-xl shadow-lg overflow-hidden border-2 border-purple-200">
-                                            <div
+                                            <div 
                                                 className="p-6 cursor-pointer hover:bg-purple-50 transition-colors"
                                                 onClick={() => setExpandedCustomer(isExpanded ? null : customer.id)}
                                             >
@@ -1249,7 +1207,7 @@
                                                                     <div className="bg-blue-600 text-white px-3 py-2">
                                                                         <span className="text-lg font-bold">Card #{order.cardNumber}</span>
                                                                     </div>
-
+                                                                    
                                                                     <div className="p-3">
                                                                         <div className="flex items-start justify-between mb-2 pb-2 border-b border-gray-200">
                                                                             <div className="flex-1 text-xs">
@@ -1268,7 +1226,7 @@
                                                                                 <Trash2 size={14} />
                                                                             </button>
                                                                         </div>
-
+                                                                    
                                                                         <div className="mb-2 pb-2 border-b border-gray-200 text-xs">
                                                                             <div className="flex justify-between mb-0.5">
                                                                                 <span className="text-gray-600">Total:</span>
@@ -1283,7 +1241,7 @@
                                                                                 <span className="font-bold text-red-600">₹{order.balance}</span>
                                                                             </div>
                                                                         </div>
-
+                                                                        
                                                                         <div className="mb-2 pb-2 border-b border-gray-200">
                                                                             <div className="text-xs font-semibold text-gray-700 mb-1">Items:</div>
                                                                             {order.items.map((item, idx) => (
@@ -1295,13 +1253,13 @@
                                                                                 </div>
                                                                             ))}
                                                                         </div>
-
+                                                                        
                                                                         <div className="flex items-center justify-between">
                                                                             <div className="flex items-center gap-2">
                                                                                 <span className={`px-2 py-1 rounded text-xs font-bold ${order.delivered ? 'bg-green-100 text-green-700' : orderIsOverdue ? 'bg-red-100 text-red-700' : 'bg-orange-100 text-orange-700'}`}>
                                                                                     {order.delivered ? '✓' : orderIsOverdue ? '⚠️' : '⏳'}
                                                                                 </span>
-
+                                                                                
                                                                                 {order.measurementPhoto && (
                                                                                     <img
                                                                                         src={order.measurementPhoto}
@@ -1311,10 +1269,10 @@
                                                                                     />
                                                                                 )}
                                                                             </div>
-
+                                                                            
                                                                             <label className="toggle-switch">
-                                                                                <input
-                                                                                    type="checkbox"
+                                                                                <input 
+                                                                                    type="checkbox" 
                                                                                     checked={order.delivered || false}
                                                                                     onChange={() => toggleOrderStatus(order.id)}
                                                                                 />
@@ -1443,7 +1401,7 @@
                             await db.collection('customers').doc(customer.id).update({
                                 name: customerName
                             });
-                            const updatedCustomers = customers.map(c =>
+                            const updatedCustomers = customers.map(c => 
                                 c.phone === phoneNumber ? { ...c, name: customerName } : c
                             );
                             setCustomers(updatedCustomers);
@@ -1470,13 +1428,13 @@
                     };
                     await orderRef.set(order);
                     setOrders([...orders, order]);
-
+                    
                     setLoading(false);
                     return order;
                 } catch (error) {
                     setLoading(false);
                     console.error('Error saving order:', error);
-
+                    
                     // Better error message
                     if (error.code === 'permission-denied') {
                         alert('❌ Firebase Permission Error!\n\nPlease update Firebase security rules:\n1. Go to Firebase Console\n2. Firestore Database → Rules\n3. Set: allow read, write: if true;\n4. Publish');
@@ -1490,7 +1448,7 @@
                 const element = billRef.current;
                 const originalWidth = element.style.width;
                 element.style.width = '600px';
-
+                
                 const canvas = await html2canvas(element, {
                     scale: 2,
                     backgroundColor: '#ffffff',
@@ -1582,7 +1540,7 @@ Your bill from Polo Fashions is ready.\n\nCard No: ${cardNumber}\nDate: ${date}$
             return (
                 <div className="app-container">
                     {loading && <LoadingOverlay message="Saving to cloud..." />}
-
+                    
                     <div className="card">
                         <div className="flex justify-between items-center mb-8">
                             <h1 className="text-2xl font-bold text-blue-900 flex items-center gap-2">
@@ -1836,19 +1794,19 @@ Your bill from Polo Fashions is ready.\n\nCard No: ${cardNumber}\nDate: ${date}$
                             Card Preview
                         </h2>
                         <div ref={billRef} className="bg-white card-bill">
-                            <div style={{ fontSize: '12px' }} className="mb-2 text-center text-black">
+                            <div style={{fontSize: '12px'}} className="mb-2 text-center text-black">
                                 ✋ We are not responsible for stitched cloths after 3 Months
                             </div>
-
+                            
                             <div className="bill-border mb-3 name-card">
                                 <div className="text-center">
-                                    <div style={{ fontSize: '32px' }} className="font-bold text-blue-900 mb-2">ಪೋಲೋ ಫ್ಯಾಷನ್ಸ್</div>
-                                    <div style={{ fontSize: '32px' }} className="font-bold my-3 text-blue-900">Card no: {cardNumber || '___'}</div>
-                                    <div style={{ fontSize: '22px' }} className="font-semibold mb-1">{customerName || 'Customer Name'}</div>
-                                    <div style={{ fontSize: '18px' }} className="mb-1">📞 {phoneNumber || '___________'}</div>
-                                    <div style={{ fontSize: '18px' }}>📅 Date: {date}</div>
+                                    <div style={{fontSize: '32px'}} className="font-bold text-blue-900 mb-2">ಪೋಲೋ ಫ್ಯಾಷನ್ಸ್</div>
+                                    <div style={{fontSize: '32px'}} className="font-bold my-3 text-blue-900">Card no: {cardNumber || '___'}</div>
+                                    <div style={{fontSize: '22px'}} className="font-semibold mb-1">{customerName || 'Customer Name'}</div>
+                                    <div style={{fontSize: '18px'}} className="mb-1">📞 {phoneNumber || '___________'}</div>
+                                    <div style={{fontSize: '18px'}}>📅 Date: {date}</div>
                                     {readyDate && (
-                                        <div style={{ fontSize: '18px' }} className={`mt-2 font-bold ${isOverdue() ? 'text-red-600' : 'text-green-700'}`}>
+                                        <div style={{fontSize: '18px'}} className={`mt-2 font-bold ${isOverdue() ? 'text-red-600' : 'text-green-700'}`}>
                                             ⏰ Ready By: {readyDate}
                                         </div>
                                     )}
@@ -1859,19 +1817,19 @@ Your bill from Polo Fashions is ready.\n\nCard No: ${cardNumber}\nDate: ${date}$
                                 <table className="w-full">
                                     <thead className="bg-blue-900 text-white">
                                         <tr>
-                                            <th style={{ fontSize: '16px' }} className="p-2 text-left">Sr.</th>
-                                            <th style={{ fontSize: '16px' }} className="p-2 text-center">SHIRTS</th>
-                                            <th style={{ fontSize: '16px' }} className="p-2 text-center">PANTS</th>
-                                            <th style={{ fontSize: '16px' }} className="p-2 text-right">Amount</th>
+                                            <th style={{fontSize: '16px'}} className="p-2 text-left">Sr.</th>
+                                            <th style={{fontSize: '16px'}} className="p-2 text-center">SHIRTS</th>
+                                            <th style={{fontSize: '16px'}} className="p-2 text-center">PANTS</th>
+                                            <th style={{fontSize: '16px'}} className="p-2 text-right">Amount</th>
                                         </tr>
                                     </thead>
                                     <tbody>
                                         {items.map((item, index) => (
                                             <tr key={index} className="border-b-2 border-blue-900">
-                                                <td style={{ fontSize: '16px' }} className="p-2">{index + 1}</td>
-                                                <td style={{ fontSize: '16px' }} className="p-2 text-center">{item.shirts}</td>
-                                                <td style={{ fontSize: '16px' }} className="p-2 text-center">{item.pants}</td>
-                                                <td style={{ fontSize: '16px' }} className="p-2 text-right font-semibold">
+                                                <td style={{fontSize: '16px'}} className="p-2">{index + 1}</td>
+                                                <td style={{fontSize: '16px'}} className="p-2 text-center">{item.shirts}</td>
+                                                <td style={{fontSize: '16px'}} className="p-2 text-center">{item.pants}</td>
+                                                <td style={{fontSize: '16px'}} className="p-2 text-right font-semibold">
                                                     {item.amount}
                                                 </td>
                                             </tr>
@@ -1881,29 +1839,29 @@ Your bill from Polo Fashions is ready.\n\nCard No: ${cardNumber}\nDate: ${date}$
                             </div>
 
                             <div className="bill-border mb-3">
-                                <div style={{ fontSize: '20px' }} className="flex justify-between font-bold mb-2">
+                                <div style={{fontSize: '20px'}} className="flex justify-between font-bold mb-2">
                                     <span>Total:</span>
                                     <span>₹{calculateTotal().toFixed(0)}</span>
                                 </div>
-                                <div style={{ fontSize: '20px' }} className="flex justify-between font-bold mb-2">
+                                <div style={{fontSize: '20px'}} className="flex justify-between font-bold mb-2">
                                     <span>Advance:</span>
                                     <span>₹{advance || '0'}</span>
                                 </div>
-                                <div style={{ fontSize: '24px' }} className="flex justify-between font-bold text-red-600 pt-2 border-t-2 border-blue-900">
+                                <div style={{fontSize: '24px'}} className="flex justify-between font-bold text-red-600 pt-2 border-t-2 border-blue-900">
                                     <span>Balance:</span>
                                     <span>₹{calculateBalance().toFixed(0)}</span>
                                 </div>
                             </div>
 
                             <div className="text-center bill-border address-card">
-                                <div style={{ fontSize: '32px' }} className="font-bold text-blue-900 mb-1">POLO FASHIONS</div>
-                                <div style={{ fontSize: '14px' }}>
+                                <div style={{fontSize: '32px'}} className="font-bold text-blue-900 mb-1">POLO FASHIONS</div>
+                                <div style={{fontSize: '14px'}}>
                                     Get Your Dress Ready in as soon as 1–2 Hours – Only at Polo Fashions!
                                 </div>
-                                <div style={{ fontSize: '14px' }}>#GF-30, Anjuman-Eslamiya Complex,</div>
-                                <div style={{ fontSize: '14px' }}>T.V.S. Road</div>
-                                <div style={{ fontSize: '14px' }}>Kollegal-571 440</div>
-                                <div style={{ fontSize: '16px' }} className="font-bold mt-1">Mob: 9742445626</div>
+                                <div style={{fontSize: '14px'}}>#GF-30, Anjuman-Eslamiya Complex,</div>
+                                <div style={{fontSize: '14px'}}>T.V.S. Road</div>
+                                <div style={{fontSize: '14px'}}>Kollegal-571 440</div>
+                                <div style={{fontSize: '16px'}} className="font-bold mt-1">Mob: 9742445626</div>
                             </div>
                         </div>
                     </div>
@@ -1950,7 +1908,7 @@ Your bill from Polo Fashions is ready.\n\nCard No: ${cardNumber}\nDate: ${date}$
 
             if (currentPage === 'database') {
                 return (
-                    <CustomerDatabase
+                    <CustomerDatabase 
                         onBack={() => setCurrentPage('home')}
                         customers={customers}
                         orders={orders}
@@ -1959,17 +1917,17 @@ Your bill from Polo Fashions is ready.\n\nCard No: ${cardNumber}\nDate: ${date}$
                     />
                 );
             }
-
+            
             if (currentPage === 'staff') {
                 return (
-                    <StaffManagement
+                    <StaffManagement 
                         onBack={() => setCurrentPage('home')}
                     />
                 );
             }
 
             return (
-                <HomePage
+                <HomePage 
                     onOpenDatabase={() => setCurrentPage('database')}
                     onOpenStaff={() => setCurrentPage('staff')}
                     customers={customers}
