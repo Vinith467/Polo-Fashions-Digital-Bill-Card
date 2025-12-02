@@ -1004,7 +1004,6 @@
                         const customerHasOrders = updatedOrders.some(o => o.customerId === customerId);
                         if (!customerHasOrders) {
                             await db.collection('customers').doc(customerId).delete();
-                            window.location.reload();
                         }
                     } catch (error) {
                         console.error('Error deleting order:', error);
